@@ -1,0 +1,10 @@
+name: Caravans
+main: com.zconami.Caravans.CaravansPlugin
+depend: [Factions, Gringotts]
+version: 1.0
+commands:
+  caravan:
+    description: Use the help pages to find a command
+    usage: /<command> help
+    permission: <plugin name>.caravan
+    permission-message: You do not have <permission>
