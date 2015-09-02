@@ -10,149 +10,125 @@ import com.zconami.Caravans.storage.DataKey;
 
 public class Region extends Entity {
 
-	// ===================================
-	// INNER CLASSES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	public enum RegionType {
-		CARAVAN_ORIGIN(true, false), CARAVAN_DESTINATION(false, true), CARAVAN_BOTH(true, true);
+    public static final String CENTER = "center";
+    public static final String CENTER_WORLD = CENTER + ".world";
+    public static final String CENTER_X = CENTER + ".x";
+    public static final String CENTER_Y = CENTER + ".y";
+    public static final String CENTER_Z = CENTER + ".z";
+    private Location center;
 
-		private final boolean isOrigin;
-		private final boolean isDestination;
+    public static final String RADIUS = "radius";
+    private int radius;
 
-		RegionType(boolean isOrigin, boolean isDestination) {
-			this.isOrigin = isOrigin;
-			this.isDestination = isDestination;
-		}
+    public static final String NAME = "name";
+    private String name;
 
-		public boolean isOrigin() {
-			return isOrigin;
-		}
+    public static final String IS_ORIGIN = "isOrigin";
+    private boolean isOrigin;
 
-		public boolean isDestination() {
-			return isDestination;
-		}
-	}
+    public static final String IS_DESTINATION = "isDestination";
+    private boolean isDestination;
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public static final String CENTER = "center";
-	public static final String CENTER_WORLD = CENTER + ".world";
-	public static final String CENTER_X = CENTER + ".x";
-	public static final String CENTER_Y = CENTER + ".y";
-	public static final String CENTER_Z = CENTER + ".z";
-	private Location center;
+    public Region(DataKey entityData) {
+        super(entityData.getPath(), entityData);
+    }
 
-	public static final String RADIUS = "radius";
-	private int radius;
+    private Region(RegionCreateParameters params) {
+        super(params);
+        apply(params);
+    }
 
-	public static final String NAME = "name";
-	private String name;
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public static final String IS_ORIGIN = "isOrigin";
-	private boolean isOrigin;
+    public static Region create(RegionCreateParameters params) {
+        return new Region(params);
+    }
 
-	public static final String IS_DESTINATION = "isDestination";
-	private boolean isDestination;
+    public Location getCenter() {
+        return center;
+    }
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    public int getRadius() {
+        return radius;
+    }
 
-	public Region(DataKey entityData) {
-		super(entityData.getPath(), entityData);
-	}
+    public String getName() {
+        return name;
+    }
 
-	private Region(RegionCreateParameters params) {
-		super(params);
-		apply(params);
-	}
+    public boolean isOrigin() {
+        return isOrigin;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    public boolean isDestination() {
+        return isDestination;
+    }
 
-	public static Region create(RegionCreateParameters params) {
-		return new Region(params);
-	}
+    public boolean contains(Location location) {
+        final double x = location.getX();
+        final double z = location.getZ();
+        return x < (center.getBlockX() + radius) && x > (center.getBlockX() - radius)
+                && z < (center.getBlockZ() + radius) && z > (center.getBlockZ() - radius);
+    }
 
-	public Location getCenter() {
-		return center;
-	}
+    // ===================================
+    // PRIVATE METHODS
+    // ===================================
 
-	public int getRadius() {
-		return radius;
-	}
+    private void apply(RegionCreateParameters params) {
+        this.center = params.getCenter();
+        this.radius = params.getRadius();
+        this.name = params.getName();
+        this.isOrigin = params.isOrigin();
+        this.isDestination = params.isDestination();
+    }
 
-	public String getName() {
-		return name;
-	}
+    // ===================================
+    // IMPLEMENTATION OF Entity
+    // ===================================
 
-	public boolean isOrigin() {
-		return isOrigin;
-	}
+    @Override
+    public void readData(DataKey dataKey) {
+        final UUID worldUUID = UUID.fromString(dataKey.getString(CENTER_WORLD));
+        final double centerX = dataKey.getDouble(CENTER_X);
+        final double centerY = dataKey.getDouble(CENTER_Y);
+        final double centerZ = dataKey.getDouble(CENTER_Z);
 
-	public boolean isDestination() {
-		return isDestination;
-	}
+        this.center = new Location(Bukkit.getWorld(worldUUID), centerX, centerY, centerZ);
+        this.radius = dataKey.getInt(RADIUS);
+        this.name = dataKey.getString(NAME);
+        this.isOrigin = dataKey.getBoolean(IS_ORIGIN);
+        this.isDestination = dataKey.getBoolean(IS_DESTINATION);
+    }
 
-	public boolean contains(Location location) {
-		final double x = location.getX();
-		final double z = location.getZ();
-		return x < (center.getBlockX() + radius) && x > (center.getBlockX() - radius)
-				&& z < (center.getBlockZ() + radius) && z > (center.getBlockZ() - radius);
-	}
+    @Override
+    public void writeData(DataKey dataKey) {
+        dataKey.setString(CENTER_WORLD, center.getWorld().getUID().toString());
+        dataKey.setDouble(CENTER_X, center.getX());
+        dataKey.setDouble(CENTER_Y, center.getY());
+        dataKey.setDouble(CENTER_Z, center.getZ());
 
-	// ===================================
-	// PRIVATE METHODS
-	// ===================================
+        dataKey.setInt(RADIUS, radius);
 
-	private void apply(RegionCreateParameters params) {
-		this.center = params.getCenter();
-		this.radius = params.getRadius();
-		this.name = params.getName();
-		this.isOrigin = params.isOrigin();
-		this.isDestination = params.isDestination();
-	}
+        dataKey.setString(NAME, name);
 
-	// ===================================
-	// IMPLEMENTATION OF Entity
-	// ===================================
+        dataKey.setBoolean(IS_ORIGIN, isOrigin);
+        dataKey.setBoolean(IS_DESTINATION, isDestination);
+    }
 
-	@Override
-	public void readData(DataKey dataKey) {
-		final UUID worldUUID = UUID.fromString(dataKey.getString(CENTER_WORLD));
-		final double centerX = dataKey.getDouble(CENTER_X);
-		final double centerY = dataKey.getDouble(CENTER_Y);
-		final double centerZ = dataKey.getDouble(CENTER_Z);
-
-		this.center = new Location(Bukkit.getWorld(worldUUID), centerX, centerY, centerZ);
-		this.radius = dataKey.getInt(RADIUS);
-		this.name = dataKey.getString(NAME);
-		this.isOrigin = dataKey.getBoolean(IS_ORIGIN);
-		this.isDestination = dataKey.getBoolean(IS_DESTINATION);
-	}
-
-	@Override
-	public void writeData(DataKey dataKey) {
-		dataKey.setString(CENTER_WORLD, center.getWorld().getUID().toString());
-		dataKey.setDouble(CENTER_X, center.getX());
-		dataKey.setDouble(CENTER_Y, center.getY());
-		dataKey.setDouble(CENTER_Z, center.getZ());
-
-		dataKey.setInt(RADIUS, radius);
-
-		dataKey.setString(NAME, name);
-
-		dataKey.setBoolean(IS_ORIGIN, isOrigin);
-		dataKey.setBoolean(IS_DESTINATION, isDestination);
-	}
-
-	@Override
-	protected void saveChanges() {
-		RegionRepository.getInstance().saveChanges(this);
-	}
+    @Override
+    protected void saveChanges() {
+        RegionRepository.getInstance().saveChanges(this);
+    }
 
 }
