@@ -4,49 +4,49 @@ import com.zconami.Caravans.storage.DataKey;
 
 public abstract class Entity {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private String key;
+    private String key;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public Entity(String key, DataKey entityData) {
-		this.key = key;
-		readData(entityData);
-	}
+    public Entity(String key, DataKey entityData) {
+        this.key = key;
+        readData(entityData);
+    }
 
-	public Entity(EntityCreateParameters params) {
-		apply(params);
-	}
+    public Entity(EntityCreateParameters params) {
+        apply(params);
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public String getKey() {
-		return key;
-	}
+    public String getKey() {
+        return key;
+    }
 
-	// ===================================
-	// PRIVATE METHODS
-	// ===================================
+    // ===================================
+    // PRIVATE METHODS
+    // ===================================
 
-	private void apply(EntityCreateParameters params) {
-		this.key = params.getKey();
-	}
+    private void apply(EntityCreateParameters params) {
+        this.key = params.getKey();
+    }
 
-	// ===================================
-	// ABSTRACT METHODS
-	// ===================================
+    // ===================================
+    // ABSTRACT METHODS
+    // ===================================
 
-	public abstract void readData(DataKey dataKey);
+    public abstract void readData(DataKey dataKey);
 
-	public abstract void writeData(DataKey dataKey);
+    public abstract void writeData(DataKey dataKey);
 
-	protected abstract void saveChanges();
+    protected abstract void saveChanges();
 
 }

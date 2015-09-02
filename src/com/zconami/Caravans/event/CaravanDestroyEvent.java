@@ -8,52 +8,52 @@ import com.zconami.Caravans.domain.Caravan;
 
 public class CaravanDestroyEvent extends Event {
 
-	// ===================================
-	// CONSTANTS
-	// ===================================
+    // ===================================
+    // CONSTANTS
+    // ===================================
 
-	private static final HandlerList handlers = new HandlerList();
+    private static final HandlerList handlers = new HandlerList();
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private final Caravan caravan;
+    private final Caravan caravan;
 
-	private final Player destroyer;
+    private final Player destroyer;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public CaravanDestroyEvent(Caravan caravan, Player destroyer) {
-		this.caravan = caravan;
-		this.destroyer = destroyer;
-	}
+    public CaravanDestroyEvent(Caravan caravan, Player destroyer) {
+        this.caravan = caravan;
+        this.destroyer = destroyer;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public Caravan getCaravan() {
-		return caravan;
-	}
+    public Caravan getCaravan() {
+        return caravan;
+    }
 
-	public Player getDestroyer() {
-		return destroyer;
-	}
+    public Player getDestroyer() {
+        return destroyer;
+    }
 
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF Event
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF Event
+    // ===================================
 
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
 
 }

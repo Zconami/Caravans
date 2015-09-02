@@ -6,12 +6,12 @@ import net.minecraft.server.v1_8_R3.EntityPlayer;
 
 public class BeneficiaryCreateParameters extends LinkedEntityCreateParameters<Player, EntityPlayer> {
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public BeneficiaryCreateParameters(Player player) {
-		super(player);
-	}
+    public BeneficiaryCreateParameters(Player player) {
+        super(player);
+    }
 
 }

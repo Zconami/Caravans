@@ -9,33 +9,33 @@ import com.zconami.Caravans.CaravansPlugin;
 
 public class Utils {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	public static final int TICKS_PER_SECOND = 20;
+    public static final int TICKS_PER_SECOND = 20;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	private Utils() {
-	}
+    private Utils() {
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public static int ticks(int seconds) {
-		return seconds * TICKS_PER_SECOND;
-	}
+    public static int ticks(int seconds) {
+        return seconds * TICKS_PER_SECOND;
+    }
 
-	public static Logger getLogger() {
-		return getJavaPlugin().getLogger();
-	}
+    public static Logger getLogger() {
+        return getJavaPlugin().getLogger();
+    }
 
-	public static JavaPlugin getJavaPlugin() {
-		return (JavaPlugin) Bukkit.getServer().getPluginManager().getPlugin(CaravansPlugin.PLUGIN_NAME);
-	}
+    public static JavaPlugin getJavaPlugin() {
+        return (JavaPlugin) Bukkit.getServer().getPluginManager().getPlugin(CaravansPlugin.PLUGIN_NAME);
+    }
 
 }

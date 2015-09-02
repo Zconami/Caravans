@@ -7,22 +7,22 @@ import com.zconami.Caravans.repository.CaravanRepository;
 
 public class CaravansUtils {
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	private CaravansUtils() {
-	}
+    private CaravansUtils() {
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public static boolean isCaravan(Entity entity) {
-		if (entity instanceof Horse) {
-			return CaravanRepository.getInstance().find((Horse) entity) != null;
-		}
-		return false;
-	}
+    public static boolean isCaravan(Entity entity) {
+        if (entity instanceof Horse) {
+            return CaravanRepository.getInstance().find((Horse) entity) != null;
+        }
+        return false;
+    }
 
 }

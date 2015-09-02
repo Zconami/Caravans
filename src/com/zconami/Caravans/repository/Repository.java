@@ -17,97 +17,97 @@ import com.zconami.Caravans.util.EntityUtils;
 
 public abstract class Repository<E extends Entity> {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private final Storage storage;
-	private final DataKey root;
+    private final Storage storage;
+    private final DataKey root;
 
-	private final Map<String, E> cache = Maps.newHashMap();
+    private final Map<String, E> cache = Maps.newHashMap();
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	protected Repository() {
-		final File dataFolder = getJavaPlugin().getDataFolder();
-		this.storage = new YamlStorage(new File(dataFolder, getEntityName() + ".yml"));
-		this.storage.load();
-		this.root = storage.getKey("");
-	}
+    protected Repository() {
+        final File dataFolder = getJavaPlugin().getDataFolder();
+        this.storage = new YamlStorage(new File(dataFolder, getEntityName() + ".yml"));
+        this.storage.load();
+        this.root = storage.getKey("");
+    }
 
-	// ===================================
-	// PROTECTED METHODS
-	// ===================================
+    // ===================================
+    // PROTECTED METHODS
+    // ===================================
 
-	protected E save(E entity) {
-		// Persist extra data
-		final String key = entity.getKey();
-		final DataKey entityData = root.getRelative(key);
-		entity.writeData(entityData);
+    protected E save(E entity) {
+        // Persist extra data
+        final String key = entity.getKey();
+        final DataKey entityData = root.getRelative(key);
+        entity.writeData(entityData);
 
-		cache.put(key, entity);
-		storage.save();
+        cache.put(key, entity);
+        storage.save();
 
-		return entity;
-	}
+        return entity;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public void remove(E entity) {
-		final String key = entity.getKey();
-		cache.remove(key);
-		root.removeKey(key);
-		removeLookups(entity);
+    public void remove(E entity) {
+        final String key = entity.getKey();
+        cache.remove(key);
+        root.removeKey(key);
+        removeLookups(entity);
 
-		storage.save();
-		EntityUtils.removeFromCache(key);
-	}
+        storage.save();
+        EntityUtils.removeFromCache(key);
+    }
 
-	public E find(String key) {
-		final E cached = cache.get(key);
-		if (cached != null) {
-			return cached;
-		}
+    public E find(String key) {
+        final E cached = cache.get(key);
+        if (cached != null) {
+            return cached;
+        }
 
-		this.storage.load();
+        this.storage.load();
 
-		if (root.keyExists(key)) {
-			getLogger().info("Key exists, loading from storage");
-			// Not in cache, but exists in storage, just hasn't been loaded yet
-			final DataKey entityData = root.getRelative(key);
+        if (root.keyExists(key)) {
+            getLogger().info("Key exists, loading from storage");
+            // Not in cache, but exists in storage, just hasn't been loaded yet
+            final DataKey entityData = root.getRelative(key);
 
-			final E recreated = recreate(entityData);
-			cache.put(key, recreated);
-			createLookups(recreated);
-			return recreated;
-		}
-		getLogger().info("Key does not exist");
-		return null;
-	}
+            final E recreated = recreate(entityData);
+            cache.put(key, recreated);
+            createLookups(recreated);
+            return recreated;
+        }
+        getLogger().info("Key does not exist");
+        return null;
+    }
 
-	public List<E> all() {
-		this.storage.load();
-		final List<E> entities = Lists.newArrayList();
-		root.getSubKeys().forEach(key -> entities.add(find(key.getPath())));
-		return entities;
-	}
+    public List<E> all() {
+        this.storage.load();
+        final List<E> entities = Lists.newArrayList();
+        root.getSubKeys().forEach(key -> entities.add(find(key.getPath())));
+        return entities;
+    }
 
-	// ===================================
-	// ABSTRACT METHODS
-	// ===================================
+    // ===================================
+    // ABSTRACT METHODS
+    // ===================================
 
-	public abstract void saveChanges(E entity);
+    public abstract void saveChanges(E entity);
 
-	protected abstract E recreate(DataKey entityData);
+    protected abstract E recreate(DataKey entityData);
 
-	protected abstract String getEntityName();
+    protected abstract String getEntityName();
 
-	protected abstract void createLookups(E entity);
+    protected abstract void createLookups(E entity);
 
-	protected abstract void removeLookups(E entity);
+    protected abstract void removeLookups(E entity);
 
 }

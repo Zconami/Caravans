@@ -7,45 +7,45 @@ import com.zconami.Caravans.domain.Caravan;
 
 public class CaravanCreateEvent extends Event {
 
-	// ===================================
-	// CONSTANTS
-	// ===================================
+    // ===================================
+    // CONSTANTS
+    // ===================================
 
-	private static final HandlerList handlers = new HandlerList();
+    private static final HandlerList handlers = new HandlerList();
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private final Caravan caravan;
+    private final Caravan caravan;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public CaravanCreateEvent(Caravan caravan) {
-		this.caravan = caravan;
-	}
+    public CaravanCreateEvent(Caravan caravan) {
+        this.caravan = caravan;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public Caravan getCaravan() {
-		return caravan;
-	}
+    public Caravan getCaravan() {
+        return caravan;
+    }
 
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF Event
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF Event
+    // ===================================
 
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
 
 }

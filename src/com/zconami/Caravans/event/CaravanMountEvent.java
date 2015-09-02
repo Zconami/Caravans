@@ -8,52 +8,52 @@ import com.zconami.Caravans.domain.Caravan;
 
 public class CaravanMountEvent extends Event {
 
-	// ===================================
-	// CONSTANTS
-	// ===================================
+    // ===================================
+    // CONSTANTS
+    // ===================================
 
-	private static final HandlerList handlers = new HandlerList();
+    private static final HandlerList handlers = new HandlerList();
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private final Caravan caravan;
+    private final Caravan caravan;
 
-	private final Player player;
+    private final Player player;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public CaravanMountEvent(Caravan caravan, Player player) {
-		this.caravan = caravan;
-		this.player = player;
-	}
+    public CaravanMountEvent(Caravan caravan, Player player) {
+        this.caravan = caravan;
+        this.player = player;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public Caravan getCaravan() {
-		return caravan;
-	}
+    public Caravan getCaravan() {
+        return caravan;
+    }
 
-	public Player getPlayer() {
-		return player;
-	}
+    public Player getPlayer() {
+        return player;
+    }
 
-	public static HandlerList getHandlerList() {
-		return handlers;
-	}
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF Event
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF Event
+    // ===================================
 
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
 
 }

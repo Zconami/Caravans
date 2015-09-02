@@ -4,58 +4,58 @@ import org.bukkit.Location;
 
 public class RegionCreateParameters extends EntityCreateParameters {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private final String name;
-	private final Location center;
-	private final int radius;
+    private final String name;
+    private final Location center;
+    private final int radius;
 
-	private boolean isOrigin = true;
-	private boolean isDestination = true;
+    private boolean isOrigin = true;
+    private boolean isDestination = true;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public RegionCreateParameters(String key, String name, Location center, int radius) {
-		super(key);
-		this.name = name;
-		this.center = center;
-		this.radius = radius;
-	}
+    public RegionCreateParameters(String key, String name, Location center, int radius) {
+        super(key);
+        this.name = name;
+        this.center = center;
+        this.radius = radius;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Location getCenter() {
-		return center;
-	}
+    public Location getCenter() {
+        return center;
+    }
 
-	public int getRadius() {
-		return radius;
-	}
+    public int getRadius() {
+        return radius;
+    }
 
-	public boolean isOrigin() {
-		return isOrigin;
-	}
+    public boolean isOrigin() {
+        return isOrigin;
+    }
 
-	public void setOrigin(boolean isOrigin) {
-		this.isOrigin = isOrigin;
-	}
+    public void setOrigin(boolean isOrigin) {
+        this.isOrigin = isOrigin;
+    }
 
-	public boolean isDestination() {
-		return isDestination;
-	}
+    public boolean isDestination() {
+        return isDestination;
+    }
 
-	public void setDestination(boolean isDestination) {
-		this.isDestination = isDestination;
-	}
+    public void setDestination(boolean isDestination) {
+        this.isDestination = isDestination;
+    }
 
 }

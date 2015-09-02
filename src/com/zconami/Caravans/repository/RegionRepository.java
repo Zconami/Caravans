@@ -8,77 +8,77 @@ import com.zconami.Caravans.storage.DataKey;
 
 public class RegionRepository extends Repository<Region> {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private static RegionRepository instance;
+    private static RegionRepository instance;
 
-	public static final String NAME = "region";
+    public static final String NAME = "region";
 
-	private Map<String, Region> nameLookup = Maps.newHashMap();
+    private Map<String, Region> nameLookup = Maps.newHashMap();
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	private RegionRepository() {
-		super();
-		RegionRepository.instance = this;
-	}
+    private RegionRepository() {
+        super();
+        RegionRepository.instance = this;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public Region save(Region region) {
-		return super.save(region);
-	}
+    public Region save(Region region) {
+        return super.save(region);
+    }
 
-	public Region findByName(String name) {
-		final Region cached = nameLookup.get(name);
-		if (cached != null) {
-			return cached;
-		}
-		// FIXME This is so shit
-		all();
-		return nameLookup.get(name);
-	}
+    public Region findByName(String name) {
+        final Region cached = nameLookup.get(name);
+        if (cached != null) {
+            return cached;
+        }
+        // FIXME This is so shit
+        all();
+        return nameLookup.get(name);
+    }
 
-	public static RegionRepository getInstance() {
-		if (instance == null) {
-			return new RegionRepository();
-		}
-		return instance;
-	}
+    public static RegionRepository getInstance() {
+        if (instance == null) {
+            return new RegionRepository();
+        }
+        return instance;
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF Repository
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF Repository
+    // ===================================
 
-	@Override
-	protected Region recreate(DataKey entityData) {
-		return new Region(entityData);
-	}
+    @Override
+    protected Region recreate(DataKey entityData) {
+        return new Region(entityData);
+    }
 
-	@Override
-	protected String getEntityName() {
-		return NAME;
-	}
+    @Override
+    protected String getEntityName() {
+        return NAME;
+    }
 
-	@Override
-	public void saveChanges(Region region) {
-		super.save(region);
-	}
+    @Override
+    public void saveChanges(Region region) {
+        super.save(region);
+    }
 
-	@Override
-	protected void createLookups(Region region) {
-		nameLookup.put(region.getName(), region);
-	}
+    @Override
+    protected void createLookups(Region region) {
+        nameLookup.put(region.getName(), region);
+    }
 
-	@Override
-	protected void removeLookups(Region region) {
-		nameLookup.remove(region.getName());
-	}
+    @Override
+    protected void removeLookups(Region region) {
+        nameLookup.remove(region.getName());
+    }
 
 }

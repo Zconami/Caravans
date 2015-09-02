@@ -2,26 +2,26 @@ package com.zconami.Caravans.domain;
 
 public abstract class EntityCreateParameters {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private final String key;
+    private final String key;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public EntityCreateParameters(String key) {
-		this.key = key;
-	}
+    public EntityCreateParameters(String key) {
+        this.key = key;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public String getKey() {
-		return key;
-	}
+    public String getKey() {
+        return key;
+    }
 
 }

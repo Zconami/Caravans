@@ -9,64 +9,64 @@ import net.minecraft.server.v1_8_R3.EntityPlayer;
 
 public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	public static final String LAST_SUCCESSFUL_CARAVAN = "lastSuccessfulCaravan";
-	private long lastSuccessfulCaravan = 0l;
+    public static final String LAST_SUCCESSFUL_CARAVAN = "lastSuccessfulCaravan";
+    private long lastSuccessfulCaravan = 0l;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public Beneficiary(Player player, DataKey extraData) {
-		super(player, extraData);
-	}
+    public Beneficiary(Player player, DataKey extraData) {
+        super(player, extraData);
+    }
 
-	private Beneficiary(BeneficiaryCreateParameters params) {
-		super(params);
-	}
+    private Beneficiary(BeneficiaryCreateParameters params) {
+        super(params);
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public void successfulCaravan() {
-		this.lastSuccessfulCaravan = System.currentTimeMillis();
-		saveChanges();
-	}
+    public void successfulCaravan() {
+        this.lastSuccessfulCaravan = System.currentTimeMillis();
+        saveChanges();
+    }
 
-	public static Beneficiary create(BeneficiaryCreateParameters params) {
-		return new Beneficiary(params);
-	}
+    public static Beneficiary create(BeneficiaryCreateParameters params) {
+        return new Beneficiary(params);
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF Entity
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF Entity
+    // ===================================
 
-	@Override
-	protected void saveChanges() {
-		BeneficiaryRepository.getInstance().saveChanges(this);
-	}
+    @Override
+    protected void saveChanges() {
+        BeneficiaryRepository.getInstance().saveChanges(this);
+    }
 
-	@Override
-	public void readData(DataKey dataKey) {
-		this.lastSuccessfulCaravan = dataKey.getLong(LAST_SUCCESSFUL_CARAVAN);
-	}
+    @Override
+    public void readData(DataKey dataKey) {
+        this.lastSuccessfulCaravan = dataKey.getLong(LAST_SUCCESSFUL_CARAVAN);
+    }
 
-	@Override
-	public void writeData(DataKey dataKey) {
-		dataKey.setLong(LAST_SUCCESSFUL_CARAVAN, lastSuccessfulCaravan);
-	}
+    @Override
+    public void writeData(DataKey dataKey) {
+        dataKey.setLong(LAST_SUCCESSFUL_CARAVAN, lastSuccessfulCaravan);
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF LinkedEntity
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF LinkedEntity
+    // ===================================
 
-	@Override
-	public Class<Player> getBukkitEntityType() {
-		return Player.class;
-	}
+    @Override
+    public Class<Player> getBukkitEntityType() {
+        return Player.class;
+    }
 
 }

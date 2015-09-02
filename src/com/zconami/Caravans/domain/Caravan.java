@@ -32,244 +32,244 @@ import net.minecraft.server.v1_8_R3.EntityHorse;
 
 public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
-	// ===================================
-	// INNER CLASSES
-	// ===================================
+    // ===================================
+    // INNER CLASSES
+    // ===================================
 
-	public enum ProfitMultiplyerStrategy {
-		PvE {
-			@Override
-			protected double calculate(Region origin, Region destination) {
-				final double reward = getJavaPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvEReward");
-				return distanceOverBlockDivisorByReward(origin, destination, reward);
-			}
-		},
-		PvP {
-			@Override
-			protected double calculate(Region origin, Region destination) {
-				final double reward = getJavaPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvPReward");
-				return distanceOverBlockDivisorByReward(origin, destination, reward);
-			}
-		};
+    public enum ProfitMultiplyerStrategy {
+        PvE {
+            @Override
+            protected double calculate(Region origin, Region destination) {
+                final double reward = getJavaPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvEReward");
+                return distanceOverBlockDivisorByReward(origin, destination, reward);
+            }
+        },
+        PvP {
+            @Override
+            protected double calculate(Region origin, Region destination) {
+                final double reward = getJavaPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvPReward");
+                return distanceOverBlockDivisorByReward(origin, destination, reward);
+            }
+        };
 
-		private static double distanceOverBlockDivisorByReward(Region origin, Region destination, double reward) {
-			final int blockDivisor = getJavaPlugin().getConfig().getInt("caravans.profitMultiplyer.blockDivisor");
-			final double distance = destination.getCenter().distance(origin.getCenter());
-			return 1.0 + (Math.max(distance / blockDivisor, 1) * reward);
-		}
+        private static double distanceOverBlockDivisorByReward(Region origin, Region destination, double reward) {
+            final int blockDivisor = getJavaPlugin().getConfig().getInt("caravans.profitMultiplyer.blockDivisor");
+            final double distance = destination.getCenter().distance(origin.getCenter());
+            return 1.0 + (Math.max(distance / blockDivisor, 1) * reward);
+        }
 
-		protected abstract double calculate(Region origin, Region destination);
+        protected abstract double calculate(Region origin, Region destination);
 
-	}
+    }
 
-	private enum CreateStrategy {
-		MULE(Horse.Variant.MULE) {
-			@Override
-			protected Horse apply(Horse horse) {
-				horse.setAdult();
-				horse.setVariant(Horse.Variant.MULE);
-				horse.setCustomName("§cCaravan");
-				horse.setCarryingChest(true);
-				horse.setTamed(true);
-				horse.setMaxHealth(200);
-				horse.setHealth(200);
-				horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-				NMSUtils.setHorseSpeed(horse, 0.01f);
-				return horse;
-			}
-		};
+    private enum CreateStrategy {
+        MULE(Horse.Variant.MULE) {
+            @Override
+            protected Horse apply(Horse horse) {
+                horse.setAdult();
+                horse.setVariant(Horse.Variant.MULE);
+                horse.setCustomName("§cCaravan");
+                horse.setCarryingChest(true);
+                horse.setTamed(true);
+                horse.setMaxHealth(200);
+                horse.setHealth(200);
+                horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+                NMSUtils.setHorseSpeed(horse, 0.01f);
+                return horse;
+            }
+        };
 
-		private Horse.Variant variant;
+        private Horse.Variant variant;
 
-		CreateStrategy(Horse.Variant variant) {
-			this.variant = variant;
-		}
+        CreateStrategy(Horse.Variant variant) {
+            this.variant = variant;
+        }
 
-		protected abstract Horse apply(Horse horse);
+        protected abstract Horse apply(Horse horse);
 
-		public static Horse applyStrategy(Horse.Variant variant, Horse horse) {
-			for (CreateStrategy strategy : CreateStrategy.values()) {
-				if (strategy.variant.equals(variant)) {
-					return strategy.apply(horse);
-				}
-			}
-			return null;
-		}
+        public static Horse applyStrategy(Horse.Variant variant, Horse horse) {
+            for (CreateStrategy strategy : CreateStrategy.values()) {
+                if (strategy.variant.equals(variant)) {
+                    return strategy.apply(horse);
+                }
+            }
+            return null;
+        }
 
-	}
+    }
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	public static final String CARAVAN_STARTED = "caravanStarted";
-	private boolean caravanStarted = false;
+    public static final String CARAVAN_STARTED = "caravanStarted";
+    private boolean caravanStarted = false;
 
-	public static final String BENEFICIARY = "beneficiary";
-	private Beneficiary beneficiary;
+    public static final String BENEFICIARY = "beneficiary";
+    private Beneficiary beneficiary;
 
-	public static final String PROFIT_STRATEGY = "profitStrategy";
-	private ProfitMultiplyerStrategy profitStrategy;
+    public static final String PROFIT_STRATEGY = "profitStrategy";
+    private ProfitMultiplyerStrategy profitStrategy;
 
-	public static final String ORIGIN = "origin";
-	private Region origin;
+    public static final String ORIGIN = "origin";
+    private Region origin;
 
-	public static final String LOCATION_PUBLIC = "locationPublic";
-	private boolean locationPublic = false;
+    public static final String LOCATION_PUBLIC = "locationPublic";
+    private boolean locationPublic = false;
 
-	private final Faction faction;
+    private final Faction faction;
 
-	private final AccountInventory accountInventory;
+    private final AccountInventory accountInventory;
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	public Caravan(Horse horse, DataKey extraData) {
-		super(horse, extraData);
-		this.accountInventory = new AccountInventory(horse.getInventory());
-		this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
-	}
+    public Caravan(Horse horse, DataKey extraData) {
+        super(horse, extraData);
+        this.accountInventory = new AccountInventory(horse.getInventory());
+        this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
+    }
 
-	private Caravan(CaravanCreateParameters params) {
-		super(params);
-		this.beneficiary = params.getBeneficiary();
-		this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
-		this.origin = params.getOrigin();
-		this.profitStrategy = params.getProfitStrategy();
-		this.accountInventory = new AccountInventory(params.getBukkitEntity().getInventory());
-	}
+    private Caravan(CaravanCreateParameters params) {
+        super(params);
+        this.beneficiary = params.getBeneficiary();
+        this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
+        this.origin = params.getOrigin();
+        this.profitStrategy = params.getProfitStrategy();
+        this.accountInventory = new AccountInventory(params.getBukkitEntity().getInventory());
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public static Caravan muleCaravan(Beneficiary beneficiary, Region origin) {
-		getLogger().info("Creating mule caravan");
+    public static Caravan muleCaravan(Beneficiary beneficiary, Region origin) {
+        getLogger().info("Creating mule caravan");
 
-		final Location location = origin.getCenter();
+        final Location location = origin.getCenter();
 
-		final World world = location.getWorld();
-		final Horse horse = CreateStrategy.applyStrategy(Horse.Variant.MULE,
-				(Horse) world.spawnEntity(location, EntityType.HORSE));
+        final World world = location.getWorld();
+        final Horse horse = CreateStrategy.applyStrategy(Horse.Variant.MULE,
+                (Horse) world.spawnEntity(location, EntityType.HORSE));
 
-		final ProfitMultiplyerStrategy profitStrategy;
+        final ProfitMultiplyerStrategy profitStrategy;
 
-		final Set<Faction> onlineFactions = Sets.newHashSet();
-		for (Faction faction : Bukkit.getOnlinePlayers().stream().map(player -> MPlayer.get(player).getFaction())
-				.collect(Collectors.toList())) {
-			if (!faction.getId().equals(Factions.ID_NONE) && !faction.getId().equals(Factions.ID_SAFEZONE)
-					&& !faction.getId().equals(Factions.ID_WARZONE)) {
-				onlineFactions.add(faction);
-			}
-		}
-		if (onlineFactions.size() >= 2) {
-			profitStrategy = ProfitMultiplyerStrategy.PvP;
-		} else {
-			profitStrategy = ProfitMultiplyerStrategy.PvE;
-		}
+        final Set<Faction> onlineFactions = Sets.newHashSet();
+        for (Faction faction : Bukkit.getOnlinePlayers().stream().map(player -> MPlayer.get(player).getFaction())
+                .collect(Collectors.toList())) {
+            if (!faction.getId().equals(Factions.ID_NONE) && !faction.getId().equals(Factions.ID_SAFEZONE)
+                    && !faction.getId().equals(Factions.ID_WARZONE)) {
+                onlineFactions.add(faction);
+            }
+        }
+        if (onlineFactions.size() >= 2) {
+            profitStrategy = ProfitMultiplyerStrategy.PvP;
+        } else {
+            profitStrategy = ProfitMultiplyerStrategy.PvE;
+        }
 
-		final CaravanCreateParameters params = new CaravanCreateParameters(horse, beneficiary, origin, profitStrategy);
+        final CaravanCreateParameters params = new CaravanCreateParameters(horse, beneficiary, origin, profitStrategy);
 
-		return new Caravan(params);
-	}
+        return new Caravan(params);
+    }
 
-	public Beneficiary getBeneficiary() {
-		return beneficiary;
-	}
+    public Beneficiary getBeneficiary() {
+        return beneficiary;
+    }
 
-	public long getInvestment() {
-		return this.accountInventory.balance();
-	}
+    public long getInvestment() {
+        return this.accountInventory.balance();
+    }
 
-	public long getReturn(Region destination) {
-		return getInvestment() + (long) Math.floor(this.profitStrategy.calculate(origin, destination));
-	}
+    public long getReturn(Region destination) {
+        return getInvestment() + (long) Math.floor(this.profitStrategy.calculate(origin, destination));
+    }
 
-	public Region getOrigin() {
-		return origin;
-	}
+    public Region getOrigin() {
+        return origin;
+    }
 
-	public Faction getFaction() {
-		return faction;
-	}
+    public Faction getFaction() {
+        return faction;
+    }
 
-	public boolean isCaravanStarted() {
-		return this.caravanStarted;
-	}
+    public boolean isCaravanStarted() {
+        return this.caravanStarted;
+    }
 
-	public void caravanHasStarted() {
-		if (this.caravanStarted == false) {
-			this.caravanStarted = true;
-			saveChanges();
-		}
-	}
+    public void caravanHasStarted() {
+        if (this.caravanStarted == false) {
+            this.caravanStarted = true;
+            saveChanges();
+        }
+    }
 
-	public boolean isLocationPublic() {
-		return locationPublic;
-	}
+    public boolean isLocationPublic() {
+        return locationPublic;
+    }
 
-	public void locationIsPublic() {
-		if (this.locationPublic == false) {
-			this.locationPublic = true;
-			saveChanges();
-		}
-	}
+    public void locationIsPublic() {
+        if (this.locationPublic == false) {
+            this.locationPublic = true;
+            saveChanges();
+        }
+    }
 
-	public void remove() {
-		getBukkitEntity().eject();
-		accountInventory.remove(getInvestment());
-		getBukkitEntity().remove();
-		CaravanRepository.getInstance().remove(this);
-		ScoreboardUtils.stopScoreboard(this);
-	}
+    public void remove() {
+        getBukkitEntity().eject();
+        accountInventory.remove(getInvestment());
+        getBukkitEntity().remove();
+        CaravanRepository.getInstance().remove(this);
+        ScoreboardUtils.stopScoreboard(this);
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF Entity
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF Entity
+    // ===================================
 
-	@Override
-	public void writeData(DataKey dataKey) {
-		dataKey.setBoolean(CARAVAN_STARTED, caravanStarted);
+    @Override
+    public void writeData(DataKey dataKey) {
+        dataKey.setBoolean(CARAVAN_STARTED, caravanStarted);
 
-		dataKey.setString(BENEFICIARY, beneficiary.getKey());
+        dataKey.setString(BENEFICIARY, beneficiary.getKey());
 
-		dataKey.setString(ORIGIN, origin.getKey());
+        dataKey.setString(ORIGIN, origin.getKey());
 
-		dataKey.setString(PROFIT_STRATEGY, profitStrategy.name());
+        dataKey.setString(PROFIT_STRATEGY, profitStrategy.name());
 
-		dataKey.setBoolean(LOCATION_PUBLIC, locationPublic);
-	}
+        dataKey.setBoolean(LOCATION_PUBLIC, locationPublic);
+    }
 
-	@Override
-	public void readData(DataKey dataKey) {
-		this.caravanStarted = dataKey.getBoolean(CARAVAN_STARTED);
+    @Override
+    public void readData(DataKey dataKey) {
+        this.caravanStarted = dataKey.getBoolean(CARAVAN_STARTED);
 
-		final UUID ownerUUID = UUID.fromString(dataKey.getString(BENEFICIARY));
-		final Player player = Bukkit.getPlayer(ownerUUID);
-		this.beneficiary = BeneficiaryRepository.getInstance().find(player);
+        final UUID ownerUUID = UUID.fromString(dataKey.getString(BENEFICIARY));
+        final Player player = Bukkit.getPlayer(ownerUUID);
+        this.beneficiary = BeneficiaryRepository.getInstance().find(player);
 
-		final String originKey = dataKey.getString(ORIGIN);
-		this.origin = RegionRepository.getInstance().find(originKey);
+        final String originKey = dataKey.getString(ORIGIN);
+        this.origin = RegionRepository.getInstance().find(originKey);
 
-		final String profitStrategyName = dataKey.getString(PROFIT_STRATEGY);
-		this.profitStrategy = ProfitMultiplyerStrategy.valueOf(profitStrategyName);
+        final String profitStrategyName = dataKey.getString(PROFIT_STRATEGY);
+        this.profitStrategy = ProfitMultiplyerStrategy.valueOf(profitStrategyName);
 
-		this.locationPublic = dataKey.getBoolean(LOCATION_PUBLIC);
-	}
+        this.locationPublic = dataKey.getBoolean(LOCATION_PUBLIC);
+    }
 
-	@Override
-	protected void saveChanges() {
-		CaravanRepository.getInstance().saveChanges(this);
-	}
+    @Override
+    protected void saveChanges() {
+        CaravanRepository.getInstance().saveChanges(this);
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF LinkedEntity
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF LinkedEntity
+    // ===================================
 
-	@Override
-	public Class<Horse> getBukkitEntityType() {
-		return Horse.class;
-	}
+    @Override
+    public Class<Horse> getBukkitEntityType() {
+        return Horse.class;
+    }
 
 }

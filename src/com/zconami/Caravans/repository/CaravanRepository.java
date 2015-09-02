@@ -9,72 +9,72 @@ import net.minecraft.server.v1_8_R3.EntityHorse;
 
 public class CaravanRepository extends LinkedRepository<Horse, EntityHorse, Caravan> {
 
-	// ===================================
-	// ATTRIBUTES
-	// ===================================
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
-	private static CaravanRepository instance;
+    private static CaravanRepository instance;
 
-	public static final String NAME = "caravan";
+    public static final String NAME = "caravan";
 
-	// ===================================
-	// CONSTRUCTORS
-	// ===================================
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
 
-	private CaravanRepository() {
-		super();
-		CaravanRepository.instance = this;
-	}
+    private CaravanRepository() {
+        super();
+        CaravanRepository.instance = this;
+    }
 
-	// ===================================
-	// PUBLIC METHODS
-	// ===================================
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
 
-	public Caravan save(Caravan caravan) {
-		return super.save(caravan);
-	}
+    public Caravan save(Caravan caravan) {
+        return super.save(caravan);
+    }
 
-	public static CaravanRepository getInstance() {
-		if (instance == null) {
-			return new CaravanRepository();
-		}
-		return instance;
-	}
+    public static CaravanRepository getInstance() {
+        if (instance == null) {
+            return new CaravanRepository();
+        }
+        return instance;
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF Repository
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF Repository
+    // ===================================
 
-	@Override
-	protected void createLookups(Caravan entity) {
-	}
+    @Override
+    protected void createLookups(Caravan entity) {
+    }
 
-	@Override
-	protected String getEntityName() {
-		return NAME;
-	}
+    @Override
+    protected String getEntityName() {
+        return NAME;
+    }
 
-	@Override
-	protected void removeLookups(Caravan entity) {
-	}
+    @Override
+    protected void removeLookups(Caravan entity) {
+    }
 
-	@Override
-	public void saveChanges(Caravan caravan) {
-		super.save(caravan);
-	}
+    @Override
+    public void saveChanges(Caravan caravan) {
+        super.save(caravan);
+    }
 
-	// ===================================
-	// IMPLEMENTATION OF LinkedRepository
-	// ===================================
+    // ===================================
+    // IMPLEMENTATION OF LinkedRepository
+    // ===================================
 
-	@Override
-	protected Class<Horse> getBukkitEntityType() {
-		return Horse.class;
-	}
+    @Override
+    protected Class<Horse> getBukkitEntityType() {
+        return Horse.class;
+    }
 
-	@Override
-	protected Caravan recreate(Horse horse, DataKey entityData) {
-		return new Caravan(horse, entityData);
-	}
+    @Override
+    protected Caravan recreate(Horse horse, DataKey entityData) {
+        return new Caravan(horse, entityData);
+    }
 
 }
