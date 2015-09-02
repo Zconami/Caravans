@@ -47,17 +47,22 @@ public class CaravanEventListener implements Listener {
     @EventHandler
     public void onCaravanMount(CaravanMountEvent event) {
         final Caravan caravan = event.getCaravan();
+        final Horse horse = caravan.getBukkitEntity();
         if (caravan.getInvestment() <= 0) {
             event.getPlayer().sendMessage("You must invest some §a" + Configuration.CONF.currency.namePlural
                     + "§f before starting a trade caravan!");
+            horse.eject();
         } else {
             if (!caravan.isCaravanStarted()) {
+                if (!caravan.getOrigin().contains(horse.getLocation())) {
+                    resetToOriginIfNotStarted(caravan, false);
+                }
                 caravan.caravanHasStarted();
                 final JavaPlugin plugin = getJavaPlugin();
                 final boolean announceStart = plugin.getConfig().getBoolean("broadcasts.announceStart");
                 final int announceLocationDelay = plugin.getConfig().getInt("broadcasts.announceLocationDelay");
                 if (announceStart) {
-                    final Location location = caravan.getBukkitEntity().getLocation();
+                    final Location location = horse.getLocation();
                     final String beneficiaryName = caravan.getBeneficiary().getBukkitEntity().getName();
                     StringBuilder announcementBuilder = new StringBuilder(
                             String.format("A trade caravan with an investment of §a%s§f has started for %s",
@@ -65,17 +70,20 @@ public class CaravanEventListener implements Listener {
                     if (announceLocationDelay <= 0) {
                         announcementBuilder
                                 .append(String.format(" @ %d,%d!", location.getBlockX(), location.getBlockZ()));
+                        ScoreboardUtils.setUpScoreboardCaravanTask(caravan);
                         caravan.locationIsPublic();
                     } else {
                         announcementBuilder.append("!");
                         plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
                             @Override
                             public void run() {
-                                plugin.getServer()
-                                        .broadcastMessage(String.format("The location of %s's caravan is %d,%d",
-                                                beneficiaryName, location.getBlockX(), location.getBlockZ()));
-                                ScoreboardUtils.setUpScoreboardCaravanTask(caravan);
-                                caravan.locationIsPublic();
+                                if (caravan.getBukkitEntity().isValid()) {
+                                    plugin.getServer()
+                                            .broadcastMessage(String.format("The location of %s's caravan is %d,%d",
+                                                    beneficiaryName, location.getBlockX(), location.getBlockZ()));
+                                    ScoreboardUtils.setUpScoreboardCaravanTask(caravan);
+                                    caravan.locationIsPublic();
+                                }
                             }
                         }, Utils.ticks(announceLocationDelay));
                     }
@@ -91,37 +99,32 @@ public class CaravanEventListener implements Listener {
         final Horse horse = caravan.getBukkitEntity();
         final Location location = horse.getLocation();
         final List<Region> regions = RegionRepository.getInstance().all();
-        for (Region region : regions) {
-            if (caravan.getOrigin().equals(region)) {
-                if (!caravan.isCaravanStarted()) {
-                    final Entity passenger = caravan.getBukkitEntity().getPassenger();
-                    final Location teleportLocation = caravan.getOrigin().getCenter();
-                    if (passenger != null) {
-                        passenger.sendMessage("You must start the caravan before leaving the region!");
-                        passenger.teleport(teleportLocation);
+        if (!caravan.getOrigin().contains(location)) {
+            if (!resetToOriginIfNotStarted(caravan)) {
+                for (Region region : regions) {
+                    if (region.isDestination() && region.contains(location)) {
+                        final Beneficiary beneficiary = caravan.getBeneficiary();
+                        final String beneficiaryName = beneficiary.getBukkitEntity().getName();
+                        final long beneficiaryReturn = caravan.getReturn(region);
+                        final GringottsAccount beneficiaryAccount = Gringotts.G.accounting
+                                .getAccount(new PlayerAccountHolder(beneficiary.getBukkitEntity()));
+                        beneficiary.successfulCaravan();
+
+                        final boolean announceSuccess = getJavaPlugin().getConfig()
+                                .getBoolean("broadcasts.announceSuccess");
+                        if (announceSuccess) {
+                            final String announcement = String.format(
+                                    "A trade caravan with an investment of §a%s§f completed successfully by %s returning §a%s§f!",
+                                    Util.format(caravan.getInvestment()), beneficiaryName,
+                                    Util.format(beneficiaryReturn));
+                            Bukkit.getServer().broadcastMessage(announcement);
+                        }
+
+                        beneficiaryAccount.add(beneficiaryReturn);
+                        caravan.remove();
+                        break;
                     }
-                    caravan.getBukkitEntity().eject();
-                    caravan.getBukkitEntity().teleport(teleportLocation);
                 }
-            } else if (region.isDestination() && region.contains(location)) {
-                final Beneficiary beneficiary = caravan.getBeneficiary();
-                final String beneficiaryName = beneficiary.getBukkitEntity().getName();
-                final long beneficiaryReturn = caravan.getReturn(region);
-                final GringottsAccount beneficiaryAccount = Gringotts.G.accounting
-                        .getAccount(new PlayerAccountHolder(beneficiary.getBukkitEntity()));
-                beneficiary.successfulCaravan();
-
-                final boolean announceSuccess = getJavaPlugin().getConfig().getBoolean("broadcasts.announceSuccess");
-                if (announceSuccess) {
-                    final String announcement = String.format(
-                            "A trade caravan with an investment of §a%s§f completed successfully by %s returning §a%s§f!",
-                            Util.format(caravan.getInvestment()), beneficiaryName, Util.format(beneficiaryReturn));
-                    Bukkit.getServer().broadcastMessage(announcement);
-                }
-
-                beneficiaryAccount.add(beneficiaryReturn);
-                caravan.remove();
-                break;
             }
         }
         getLogger().info("onCaravanMove");
@@ -161,6 +164,29 @@ public class CaravanEventListener implements Listener {
                         + Util.format(caravan.getInvestment()) + "§f");
             }
         }
+    }
+
+    private boolean resetToOriginIfNotStarted(Caravan caravan) {
+        return resetToOriginIfNotStarted(caravan, true);
+    }
+
+    private boolean resetToOriginIfNotStarted(Caravan caravan, boolean remount) {
+        final Horse horse = caravan.getBukkitEntity();
+        if (!caravan.isCaravanStarted()) {
+            final Entity passenger = horse.getPassenger();
+            final Location teleportLocation = caravan.getOrigin().getCenter();
+            horse.eject();
+            horse.teleport(teleportLocation);
+            if (passenger != null) {
+                passenger.sendMessage("You must start the caravan before leaving the region!");
+                passenger.teleport(teleportLocation);
+                if (remount) {
+                    horse.setPassenger(passenger);
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
 }
