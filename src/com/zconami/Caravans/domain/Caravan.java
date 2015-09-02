@@ -74,7 +74,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                 horse.setMaxHealth(200);
                 horse.setHealth(200);
                 horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-                NMSUtils.setHorseSpeed(horse, 0.01f);
+                NMSUtils.setHorseSpeed(horse, 0.10000000149f);
                 return horse;
             }
         };

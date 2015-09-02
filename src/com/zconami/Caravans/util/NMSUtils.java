@@ -23,15 +23,15 @@ public class NMSUtils {
     // ===================================
 
     public static void setHorseSpeed(Horse horse, float speed) {
-        EntityLiving handle = getHandle(horse);
-        ((EntityHorse) handle).getAttributeInstance(GenericAttributes.MOVEMENT_SPEED).setValue(0.10000000149011612D);
+        EntityLiving handle = getMinecraftEntity(horse);
+        ((EntityHorse) handle).getAttributeInstance(GenericAttributes.MOVEMENT_SPEED).setValue(speed);
     }
 
-    public static EntityLiving getHandle(LivingEntity entity) {
-        return (EntityLiving) getHandle((org.bukkit.entity.Entity) entity);
+    public static EntityLiving getMinecraftEntity(LivingEntity entity) {
+        return (EntityLiving) getMinecraftEntity((org.bukkit.entity.Entity) entity);
     }
 
-    public static Entity getHandle(org.bukkit.entity.Entity entity) {
+    public static Entity getMinecraftEntity(org.bukkit.entity.Entity entity) {
         if (!(entity instanceof CraftEntity))
             return null;
         return ((CraftEntity) entity).getHandle();

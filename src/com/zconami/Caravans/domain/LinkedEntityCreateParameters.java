@@ -17,7 +17,7 @@ public abstract class LinkedEntityCreateParameters<BE extends org.bukkit.entity.
     // ===================================
 
     public LinkedEntityCreateParameters(BE bukkitEntity) {
-        this(bukkitEntity, (ME) NMSUtils.getHandle(bukkitEntity));
+        this(bukkitEntity, (ME) NMSUtils.getMinecraftEntity(bukkitEntity));
     }
 
     public LinkedEntityCreateParameters(BE bukkitEntity, ME minecraftEntity) {

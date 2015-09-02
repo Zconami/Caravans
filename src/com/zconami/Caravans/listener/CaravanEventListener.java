@@ -98,9 +98,9 @@ public class CaravanEventListener implements Listener {
         final Caravan caravan = event.getCaravan();
         final Horse horse = caravan.getBukkitEntity();
         final Location location = horse.getLocation();
-        final List<Region> regions = RegionRepository.getInstance().all();
         if (!caravan.getOrigin().contains(location)) {
             if (!resetToOriginIfNotStarted(caravan)) {
+                final List<Region> regions = RegionRepository.getInstance().all();
                 for (Region region : regions) {
                     if (region.isDestination() && region.contains(location)) {
                         final Beneficiary beneficiary = caravan.getBeneficiary();
@@ -165,6 +165,10 @@ public class CaravanEventListener implements Listener {
             }
         }
     }
+
+    // ===================================
+    // PRIVATE METHODS
+    // ===================================
 
     private boolean resetToOriginIfNotStarted(Caravan caravan) {
         return resetToOriginIfNotStarted(caravan, true);
