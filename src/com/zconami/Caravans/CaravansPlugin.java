@@ -5,21 +5,65 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.zconami.Caravans.listener.CaravanEventListener;
 import com.zconami.Caravans.listener.EventTranslator;
+import com.zconami.Caravans.repository.BeneficiaryRepository;
+import com.zconami.Caravans.repository.CaravanRepository;
+import com.zconami.Caravans.repository.RegionRepository;
 
 public class CaravansPlugin extends JavaPlugin {
 
+    // ===================================
+    // CONSTANTS
+    // ===================================
+
     public static final String PLUGIN_NAME = "Caravans";
+
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
 
     private final CaravansCommandExecutor commandExecutor;
     private final EventTranslator eventTranslator;
     private final CaravanEventListener caravanEventListener;
 
+    private final RegionRepository regionRepository;
+    private final BeneficiaryRepository beneficiaryRepository;
+    private final CaravanRepository caravanRepository;
+
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
+
     public CaravansPlugin() {
         super();
-        this.commandExecutor = new CaravansCommandExecutor();
-        this.eventTranslator = new EventTranslator();
-        this.caravanEventListener = new CaravanEventListener();
+
+        this.regionRepository = new RegionRepository(this);
+        this.beneficiaryRepository = new BeneficiaryRepository(this);
+        this.caravanRepository = new CaravanRepository(this);
+
+        this.commandExecutor = new CaravansCommandExecutor(regionRepository, beneficiaryRepository, caravanRepository);
+        this.eventTranslator = new EventTranslator(caravanRepository);
+        this.caravanEventListener = new CaravanEventListener(caravanRepository, regionRepository);
     }
+
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
+
+    public RegionRepository getRegionRepository() {
+        return regionRepository;
+    }
+
+    public BeneficiaryRepository getBeneficiaryRepository() {
+        return beneficiaryRepository;
+    }
+
+    public CaravanRepository getCaravanRepository() {
+        return caravanRepository;
+    }
+
+    // ===================================
+    // IMPLEMENTATION OF JavaPlugin
+    // ===================================
 
     @Override
     public void onEnable() {

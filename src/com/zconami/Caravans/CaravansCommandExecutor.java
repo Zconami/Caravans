@@ -28,6 +28,29 @@ import com.zconami.Caravans.util.ScoreboardUtils;
 
 public class CaravansCommandExecutor implements CommandExecutor {
 
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
+
+    private final RegionRepository regionRepository;
+    private final BeneficiaryRepository beneficiaryRepository;
+    private final CaravanRepository caravanRepository;
+
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
+
+    public CaravansCommandExecutor(RegionRepository regionRepository, BeneficiaryRepository beneficiaryRepository,
+            CaravanRepository caravanRepository) {
+        this.regionRepository = regionRepository;
+        this.beneficiaryRepository = beneficiaryRepository;
+        this.caravanRepository = caravanRepository;
+    }
+
+    // ===================================
+    // IMPLEMENTATION OF CommandExecutor
+    // ===================================
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         getLogger().info("Command executed: " + command.getName());
@@ -43,7 +66,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
                 return true;
             } else if (secondary.equalsIgnoreCase("list")) {
                 int index = 1;
-                for (Caravan caravan : CaravanRepository.getInstance().all().stream()
+                for (Caravan caravan : caravanRepository.all().stream()
                         .filter(caravan -> caravan.isCaravanStarted() && caravan.isLocationPublic())
                         .collect(Collectors.toList())) {
                     sender.sendMessage(index + ": " + caravan.getBeneficiary().getBukkitEntity().getName());
@@ -52,7 +75,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
                 return true;
             } else if (secondary.equalsIgnoreCase("track") && args.length == 2 && sender instanceof Player) {
                 final int index = Integer.valueOf(args[1]).intValue() - 1;
-                final List<Caravan> caravans = CaravanRepository.getInstance().all().stream()
+                final List<Caravan> caravans = caravanRepository.all().stream()
                         .filter(caravan -> caravan.isCaravanStarted() && caravan.isLocationPublic())
                         .collect(Collectors.toList());
                 if (caravans.size() - 1 >= index) {
@@ -67,7 +90,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
             } else if (secondary.equalsIgnoreCase("createCaravan") && args.length >= 2 && sender instanceof Player) {
 
                 if (sender instanceof Player) {
-                    final Region origin = RegionRepository.getInstance().findByName(args[1]);
+                    final Region origin = regionRepository.findByName(args[1]);
                     if (origin == null || !origin.isOrigin()) {
                         sender.sendMessage("Given region does not exist or is not a valid origin!");
                         return false;
@@ -81,7 +104,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
 
                     final Beneficiary beneficiary = findOrCreate(target);
 
-                    final Caravan caravan = CaravanRepository.getInstance()
+                    final Caravan caravan = caravanRepository
                             .save(Caravan.muleCaravan(beneficiary, origin));
                     final CaravanCreateEvent caravanCreateEvent = new CaravanCreateEvent(caravan);
                     Bukkit.getServer().getPluginManager().callEvent(caravanCreateEvent);
@@ -108,7 +131,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
                     params.setDestination(isDestination);
                 }
 
-                RegionRepository.getInstance().save(Region.create(params));
+                regionRepository.save(Region.create(params));
                 return true;
             }
         }
@@ -116,12 +139,12 @@ public class CaravansCommandExecutor implements CommandExecutor {
     }
 
     private Beneficiary findOrCreate(Player player) {
-        final Beneficiary existing = BeneficiaryRepository.getInstance().find(player);
+        final Beneficiary existing = beneficiaryRepository.find(player);
         if (existing != null) {
             return existing;
         }
         final BeneficiaryCreateParameters params = new BeneficiaryCreateParameters(player);
-        return BeneficiaryRepository.getInstance().save(Beneficiary.create(params));
+        return beneficiaryRepository.save(Beneficiary.create(params));
     }
 
 }

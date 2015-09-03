@@ -1,9 +1,9 @@
 package com.zconami.Caravans.util;
 
+import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
-
-import com.zconami.Caravans.repository.CaravanRepository;
 
 public class CaravansUtils {
 
@@ -20,7 +20,7 @@ public class CaravansUtils {
 
     public static boolean isCaravan(Entity entity) {
         if (entity instanceof Horse) {
-            return CaravanRepository.getInstance().find((Horse) entity) != null;
+            return getCaravansPlugin().getCaravanRepository().find((Horse) entity) != null;
         }
         return false;
     }

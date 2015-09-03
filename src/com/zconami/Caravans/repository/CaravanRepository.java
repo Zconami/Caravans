@@ -2,6 +2,7 @@ package com.zconami.Caravans.repository;
 
 import org.bukkit.entity.Horse;
 
+import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.storage.DataKey;
 
@@ -13,17 +14,14 @@ public class CaravanRepository extends LinkedRepository<Horse, EntityHorse, Cara
     // ATTRIBUTES
     // ===================================
 
-    private static CaravanRepository instance;
-
-    public static final String NAME = "caravan";
+    private static final String NAME = "caravan";
 
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
-    private CaravanRepository() {
-        super();
-        CaravanRepository.instance = this;
+    public CaravanRepository(CaravansPlugin plugin) {
+        super(plugin);
     }
 
     // ===================================
@@ -32,13 +30,6 @@ public class CaravanRepository extends LinkedRepository<Horse, EntityHorse, Cara
 
     public Caravan save(Caravan caravan) {
         return super.save(caravan);
-    }
-
-    public static CaravanRepository getInstance() {
-        if (instance == null) {
-            return new CaravanRepository();
-        }
-        return instance;
     }
 
     // ===================================
@@ -56,11 +47,6 @@ public class CaravanRepository extends LinkedRepository<Horse, EntityHorse, Cara
 
     @Override
     protected void removeLookups(Caravan entity) {
-    }
-
-    @Override
-    public void saveChanges(Caravan caravan) {
-        super.save(caravan);
     }
 
     // ===================================

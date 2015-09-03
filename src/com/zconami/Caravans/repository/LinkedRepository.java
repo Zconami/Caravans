@@ -1,5 +1,6 @@
 package com.zconami.Caravans.repository;
 
+import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.LinkedEntity;
 import com.zconami.Caravans.storage.DataKey;
 import com.zconami.Caravans.util.EntityUtils;
@@ -11,8 +12,8 @@ public abstract class LinkedRepository<BE extends org.bukkit.entity.Entity, ME e
     // CONSTRUCTORS
     // ===================================
 
-    protected LinkedRepository() {
-        super();
+    protected LinkedRepository(CaravansPlugin plugin) {
+        super(plugin);
     }
 
     // ===================================

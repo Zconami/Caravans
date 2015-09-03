@@ -1,5 +1,8 @@
 package com.zconami.Caravans.domain;
 
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 import com.zconami.Caravans.storage.DataKey;
 
 public abstract class Entity {
@@ -9,6 +12,10 @@ public abstract class Entity {
     // ===================================
 
     private String key;
+
+    private boolean dirty;
+
+    private Set<EntityObserver> observers = Sets.newHashSet();
 
     // ===================================
     // CONSTRUCTORS
@@ -27,8 +34,31 @@ public abstract class Entity {
     // PUBLIC METHODS
     // ===================================
 
+    protected Set<EntityObserver> getObservers() {
+        return observers;
+    }
+
+    public void addObserver(EntityObserver observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(EntityObserver observer) {
+        observers.remove(observer);
+    }
+
     public String getKey() {
         return key;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+        if (dirty) {
+            observers.forEach(observer -> observer.entityChanged(this));
+        }
     }
 
     // ===================================
@@ -37,16 +67,17 @@ public abstract class Entity {
 
     private void apply(EntityCreateParameters params) {
         this.key = params.getKey();
+
     }
 
     // ===================================
     // ABSTRACT METHODS
     // ===================================
 
+    public abstract void willRemove();
+
     public abstract void readData(DataKey dataKey);
 
     public abstract void writeData(DataKey dataKey);
-
-    protected abstract void saveChanges();
 
 }

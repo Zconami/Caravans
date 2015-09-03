@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import com.zconami.Caravans.repository.RegionRepository;
 import com.zconami.Caravans.storage.DataKey;
 
 public class Region extends Entity {
@@ -98,6 +97,10 @@ public class Region extends Entity {
     // ===================================
 
     @Override
+    public void willRemove() {
+    }
+
+    @Override
     public void readData(DataKey dataKey) {
         final UUID worldUUID = UUID.fromString(dataKey.getString(CENTER_WORLD));
         final double centerX = dataKey.getDouble(CENTER_X);
@@ -124,11 +127,6 @@ public class Region extends Entity {
 
         dataKey.setBoolean(IS_ORIGIN, isOrigin);
         dataKey.setBoolean(IS_DESTINATION, isDestination);
-    }
-
-    @Override
-    protected void saveChanges() {
-        RegionRepository.getInstance().saveChanges(this);
     }
 
 }

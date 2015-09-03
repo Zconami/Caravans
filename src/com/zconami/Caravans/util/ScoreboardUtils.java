@@ -1,6 +1,6 @@
 package com.zconami.Caravans.util;
 
-import static com.zconami.Caravans.util.Utils.getJavaPlugin;
+import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 
 import java.util.Map;
 
@@ -52,7 +52,7 @@ public class ScoreboardUtils {
 
         final Horse target = caravan.getBukkitEntity();
         final BukkitScheduler scheduler = Bukkit.getScheduler();
-        final Integer taskId = Integer.valueOf(scheduler.scheduleSyncRepeatingTask(getJavaPlugin(), new Runnable() {
+        final Integer taskId = Integer.valueOf(scheduler.scheduleSyncRepeatingTask(getCaravansPlugin(), new Runnable() {
             @Override
             public void run() {
                 if (target.isValid()) {

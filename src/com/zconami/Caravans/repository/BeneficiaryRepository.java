@@ -2,6 +2,7 @@ package com.zconami.Caravans.repository;
 
 import org.bukkit.entity.Player;
 
+import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.storage.DataKey;
 
@@ -13,17 +14,14 @@ public class BeneficiaryRepository extends LinkedRepository<Player, EntityPlayer
     // ATTRIBUTES
     // ===================================
 
-    private static BeneficiaryRepository instance;
-
-    public static final String NAME = "beneficiary";
+    private static final String NAME = "beneficiary";
 
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
-    private BeneficiaryRepository() {
-        super();
-        BeneficiaryRepository.instance = this;
+    public BeneficiaryRepository(CaravansPlugin plugin) {
+        super(plugin);
     }
 
     // ===================================
@@ -32,13 +30,6 @@ public class BeneficiaryRepository extends LinkedRepository<Player, EntityPlayer
 
     public Beneficiary save(Beneficiary beneficiary) {
         return super.save(beneficiary);
-    }
-
-    public static BeneficiaryRepository getInstance() {
-        if (instance == null) {
-            return new BeneficiaryRepository();
-        }
-        return instance;
     }
 
     // ===================================
@@ -56,11 +47,6 @@ public class BeneficiaryRepository extends LinkedRepository<Player, EntityPlayer
 
     @Override
     protected void removeLookups(Beneficiary entity) {
-    }
-
-    @Override
-    public void saveChanges(Beneficiary beneficiary) {
-        super.save(beneficiary);
     }
 
     // ===================================

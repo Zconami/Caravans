@@ -1,6 +1,6 @@
 package com.zconami.Caravans.domain;
 
-import static com.zconami.Caravans.util.Utils.getJavaPlugin;
+import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 import static com.zconami.Caravans.util.Utils.getLogger;
 
 import java.util.Set;
@@ -22,7 +22,6 @@ import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
-import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
 import com.zconami.Caravans.storage.DataKey;
 import com.zconami.Caravans.util.NMSUtils;
@@ -40,20 +39,20 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         PvE {
             @Override
             protected double calculate(Region origin, Region destination) {
-                final double reward = getJavaPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvEReward");
+                final double reward = getCaravansPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvEReward");
                 return distanceOverBlockDivisorByReward(origin, destination, reward);
             }
         },
         PvP {
             @Override
             protected double calculate(Region origin, Region destination) {
-                final double reward = getJavaPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvPReward");
+                final double reward = getCaravansPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvPReward");
                 return distanceOverBlockDivisorByReward(origin, destination, reward);
             }
         };
 
         private static double distanceOverBlockDivisorByReward(Region origin, Region destination, double reward) {
-            final int blockDivisor = getJavaPlugin().getConfig().getInt("caravans.profitMultiplyer.blockDivisor");
+            final int blockDivisor = getCaravansPlugin().getConfig().getInt("caravans.profitMultiplyer.blockDivisor");
             final double distance = destination.getCenter().distance(origin.getCenter());
             return 1.0 + (Math.max(distance / blockDivisor, 1) * reward);
         }
@@ -118,8 +117,10 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     private boolean locationPublic = false;
 
     private final Faction faction;
-
     private final AccountInventory accountInventory;
+
+    private RegionRepository regionRepository;
+    private BeneficiaryRepository beneficiaryRepository;
 
     // ===================================
     // CONSTRUCTORS
@@ -129,6 +130,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         super(horse, extraData);
         this.accountInventory = new AccountInventory(horse.getInventory());
         this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
+        getRepositories();
     }
 
     private Caravan(CaravanCreateParameters params) {
@@ -138,6 +140,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.origin = params.getOrigin();
         this.profitStrategy = params.getProfitStrategy();
         this.accountInventory = new AccountInventory(params.getBukkitEntity().getInventory());
+        getRepositories();
     }
 
     // ===================================
@@ -201,7 +204,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public void caravanHasStarted() {
         if (this.caravanStarted == false) {
             this.caravanStarted = true;
-            saveChanges();
+            this.setDirty(true);
         }
     }
 
@@ -212,21 +215,30 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public void locationIsPublic() {
         if (this.locationPublic == false) {
             this.locationPublic = true;
-            saveChanges();
+            this.setDirty(true);
         }
     }
 
-    public void remove() {
-        getBukkitEntity().eject();
-        accountInventory.remove(getInvestment());
-        getBukkitEntity().remove();
-        CaravanRepository.getInstance().remove(this);
-        ScoreboardUtils.stopScoreboard(this);
+    // ===================================
+    // PRIVATE METHODS
+    // ===================================
+
+    public void getRepositories() {
+        this.beneficiaryRepository = getCaravansPlugin().getBeneficiaryRepository();
+        this.regionRepository = getCaravansPlugin().getRegionRepository();
     }
 
     // ===================================
     // IMPLEMENTATION OF Entity
     // ===================================
+
+    @Override
+    public void willRemove() {
+        getBukkitEntity().eject();
+        accountInventory.remove(getInvestment());
+        getBukkitEntity().remove();
+        ScoreboardUtils.stopScoreboard(this);
+    }
 
     @Override
     public void writeData(DataKey dataKey) {
@@ -247,20 +259,15 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
         final UUID ownerUUID = UUID.fromString(dataKey.getString(BENEFICIARY));
         final Player player = Bukkit.getPlayer(ownerUUID);
-        this.beneficiary = BeneficiaryRepository.getInstance().find(player);
+        this.beneficiary = beneficiaryRepository.find(player);
 
         final String originKey = dataKey.getString(ORIGIN);
-        this.origin = RegionRepository.getInstance().find(originKey);
+        this.origin = regionRepository.find(originKey);
 
         final String profitStrategyName = dataKey.getString(PROFIT_STRATEGY);
         this.profitStrategy = ProfitMultiplyerStrategy.valueOf(profitStrategyName);
 
         this.locationPublic = dataKey.getBoolean(LOCATION_PUBLIC);
-    }
-
-    @Override
-    protected void saveChanges() {
-        CaravanRepository.getInstance().saveChanges(this);
     }
 
     // ===================================

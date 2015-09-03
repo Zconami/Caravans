@@ -3,7 +3,6 @@ package com.zconami.Caravans.util;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import com.zconami.Caravans.CaravansPlugin;
 
@@ -31,11 +30,11 @@ public class Utils {
     }
 
     public static Logger getLogger() {
-        return getJavaPlugin().getLogger();
+        return getCaravansPlugin().getLogger();
     }
 
-    public static JavaPlugin getJavaPlugin() {
-        return (JavaPlugin) Bukkit.getServer().getPluginManager().getPlugin(CaravansPlugin.PLUGIN_NAME);
+    public static CaravansPlugin getCaravansPlugin() {
+        return (CaravansPlugin) Bukkit.getServer().getPluginManager().getPlugin(CaravansPlugin.PLUGIN_NAME);
     }
 
 }

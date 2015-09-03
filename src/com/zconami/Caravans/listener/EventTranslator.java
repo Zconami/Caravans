@@ -21,6 +21,16 @@ import com.zconami.Caravans.util.CaravansUtils;
 public class EventTranslator implements Listener {
 
     // ===================================
+    // ATTRIBUTES
+    // ===================================
+
+    private final CaravanRepository caravanRepository;
+
+    public EventTranslator(CaravanRepository caravanRepository) {
+        this.caravanRepository = caravanRepository;
+    }
+
+    // ===================================
     // PUBLIC METHODS
     // ===================================
 
@@ -28,7 +38,7 @@ public class EventTranslator implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         final Entity vehicle = event.getPlayer().getVehicle();
         if (event.getPlayer().isInsideVehicle() && CaravansUtils.isCaravan(vehicle)) {
-            final Caravan caravan = CaravanRepository.getInstance().find((Horse) vehicle);
+            final Caravan caravan = caravanRepository.find((Horse) vehicle);
             final CaravanMoveEvent caravanMoveEvent = new CaravanMoveEvent(caravan);
             Bukkit.getServer().getPluginManager().callEvent(caravanMoveEvent);
         }
@@ -38,7 +48,7 @@ public class EventTranslator implements Listener {
     public void onEntityMount(EntityMountEvent event) {
         final Entity mount = event.getMount();
         if (mount instanceof Horse && CaravansUtils.isCaravan((Horse) mount)) {
-            final Caravan caravan = CaravanRepository.getInstance().find((Horse) mount);
+            final Caravan caravan = caravanRepository.find((Horse) mount);
             final CaravanMountEvent caravanMountEvent = new CaravanMountEvent(caravan, (Player) event.getEntity());
             Bukkit.getServer().getPluginManager().callEvent(caravanMountEvent);
         }
@@ -48,7 +58,7 @@ public class EventTranslator implements Listener {
     public void onEntityDeath(EntityDeathEvent event) {
         final LivingEntity entity = event.getEntity();
         if (CaravansUtils.isCaravan(entity)) {
-            final Caravan caravan = CaravanRepository.getInstance().find((Horse) entity);
+            final Caravan caravan = caravanRepository.find((Horse) entity);
             final CaravanDestroyEvent caravanDestroyEvent = new CaravanDestroyEvent(caravan, entity.getKiller());
             Bukkit.getServer().getPluginManager().callEvent(caravanDestroyEvent);
         }

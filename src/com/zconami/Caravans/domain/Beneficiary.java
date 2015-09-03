@@ -2,7 +2,6 @@ package com.zconami.Caravans.domain;
 
 import org.bukkit.entity.Player;
 
-import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.storage.DataKey;
 
 import net.minecraft.server.v1_8_R3.EntityPlayer;
@@ -34,7 +33,7 @@ public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
 
     public void successfulCaravan() {
         this.lastSuccessfulCaravan = System.currentTimeMillis();
-        saveChanges();
+        this.setDirty(true);
     }
 
     public static Beneficiary create(BeneficiaryCreateParameters params) {
@@ -46,8 +45,7 @@ public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
     // ===================================
 
     @Override
-    protected void saveChanges() {
-        BeneficiaryRepository.getInstance().saveChanges(this);
+    public void willRemove() {
     }
 
     @Override

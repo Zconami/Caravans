@@ -3,6 +3,7 @@ package com.zconami.Caravans.repository;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Region;
 import com.zconami.Caravans.storage.DataKey;
 
@@ -12,19 +13,16 @@ public class RegionRepository extends Repository<Region> {
     // ATTRIBUTES
     // ===================================
 
-    private static RegionRepository instance;
+    private static final String NAME = "region";
 
-    public static final String NAME = "region";
-
-    private Map<String, Region> nameLookup = Maps.newHashMap();
+    private static final Map<String, Region> nameLookup = Maps.newHashMap();
 
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
-    private RegionRepository() {
-        super();
-        RegionRepository.instance = this;
+    public RegionRepository(CaravansPlugin plugin) {
+        super(plugin);
     }
 
     // ===================================
@@ -45,13 +43,6 @@ public class RegionRepository extends Repository<Region> {
         return nameLookup.get(name);
     }
 
-    public static RegionRepository getInstance() {
-        if (instance == null) {
-            return new RegionRepository();
-        }
-        return instance;
-    }
-
     // ===================================
     // IMPLEMENTATION OF Repository
     // ===================================
@@ -64,11 +55,6 @@ public class RegionRepository extends Repository<Region> {
     @Override
     protected String getEntityName() {
         return NAME;
-    }
-
-    @Override
-    public void saveChanges(Region region) {
-        super.save(region);
     }
 
     @Override
