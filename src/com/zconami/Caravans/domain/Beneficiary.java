@@ -45,10 +45,6 @@ public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
     // ===================================
 
     @Override
-    public void willRemove() {
-    }
-
-    @Override
     public void readData(DataKey dataKey) {
         this.lastSuccessfulCaravan = dataKey.getLong(LAST_SUCCESSFUL_CARAVAN);
     }

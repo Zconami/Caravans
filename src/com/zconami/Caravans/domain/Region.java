@@ -97,10 +97,6 @@ public class Region extends Entity {
     // ===================================
 
     @Override
-    public void willRemove() {
-    }
-
-    @Override
     public void readData(DataKey dataKey) {
         final UUID worldUUID = UUID.fromString(dataKey.getString(CENTER_WORLD));
         final double centerX = dataKey.getDouble(CENTER_X);

@@ -61,6 +61,10 @@ public abstract class Entity {
         }
     }
 
+    public void remove() {
+        observers.forEach(observer -> observer.entityRemoved(this));
+    }
+
     // ===================================
     // PRIVATE METHODS
     // ===================================
@@ -73,8 +77,6 @@ public abstract class Entity {
     // ===================================
     // ABSTRACT METHODS
     // ===================================
-
-    public abstract void willRemove();
 
     public abstract void readData(DataKey dataKey);
 

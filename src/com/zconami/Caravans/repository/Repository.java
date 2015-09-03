@@ -60,19 +60,6 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
     // PUBLIC METHODS
     // ===================================
 
-    public void remove(E entity) {
-        entity.willRemove();
-
-        final String key = entity.getKey();
-        root.removeKey(key);
-
-        loaded.remove(key, entity);
-        removeLookups(entity);
-
-        storage.save();
-        EntityUtils.removeFromCache(key);
-    }
-
     public E find(String key) {
 
         final E alreadyLoaded = loaded.get(key);
@@ -109,9 +96,25 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
         return entities;
     }
 
+    // ===================================
+    // IMPLEMENTATION OF EntityObserver
+    // ===================================
+
     @Override
     public void entityChanged(E entity) {
         save(entity);
+    }
+
+    @Override
+    public void entityRemoved(E entity) {
+        final String key = entity.getKey();
+        root.removeKey(key);
+
+        loaded.remove(key, entity);
+        removeLookups(entity);
+
+        storage.save();
+        EntityUtils.removeFromCache(key);
     }
 
     // ===================================

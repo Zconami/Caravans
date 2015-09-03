@@ -233,7 +233,8 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     // ===================================
 
     @Override
-    public void willRemove() {
+    public void remove() {
+        super.remove();
         getBukkitEntity().eject();
         accountInventory.remove(getInvestment());
         getBukkitEntity().remove();

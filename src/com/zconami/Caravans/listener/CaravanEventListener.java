@@ -137,7 +137,7 @@ public class CaravanEventListener implements Listener {
                         }
 
                         beneficiaryAccount.add(beneficiaryReturn);
-                        caravanRepository.remove(caravan);
+                        caravan.remove();
                         break;
                     }
                 }
@@ -161,7 +161,7 @@ public class CaravanEventListener implements Listener {
                 announcementBuilder.append("!");
             }
             Bukkit.getServer().broadcastMessage(announcementBuilder.toString());
-            caravanRepository.remove(caravan);
+            caravan.remove();
         }
     }
 
