@@ -1,6 +1,6 @@
 package com.zconami.Caravans.domain;
 
-public interface EntityObserver<E> {
+public interface EntityObserver<E extends Entity> {
 
     void entityChanged(E entity);
 
