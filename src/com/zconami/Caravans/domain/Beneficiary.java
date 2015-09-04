@@ -1,26 +1,36 @@
 package com.zconami.Caravans.domain;
 
-import org.bukkit.entity.Player;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-import com.zconami.Caravans.storage.DataKey;
+import org.bukkit.entity.Player;
 
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 
+@Entity
+@Table(name = Beneficiary.TABLE)
 public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
+
+    // ===================================
+    // CONSTANTS
+    // ===================================
+
+    public static final String TABLE = TABLE_PREFIX + "beneficiary";
 
     // ===================================
     // ATTRIBUTES
     // ===================================
 
     public static final String LAST_SUCCESSFUL_CARAVAN = "lastSuccessfulCaravan";
+    @Column(nullable = false)
     private long lastSuccessfulCaravan = 0l;
 
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
-    public Beneficiary(Player player, DataKey extraData) {
-        super(player, extraData);
+    public Beneficiary() {
     }
 
     private Beneficiary(BeneficiaryCreateParameters params) {
@@ -31,27 +41,20 @@ public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
     // PUBLIC METHODS
     // ===================================
 
-    public void successfulCaravan() {
+    public void hadSuccessfulCaravan() {
         this.lastSuccessfulCaravan = System.currentTimeMillis();
-        this.setDirty(true);
+    }
+
+    public void setLastSuccessfulCaravan(long lastSuccessfulCaravan) {
+        this.lastSuccessfulCaravan = lastSuccessfulCaravan;
+    }
+
+    public long getLastSuccessfulCaravan() {
+        return lastSuccessfulCaravan;
     }
 
     public static Beneficiary create(BeneficiaryCreateParameters params) {
         return new Beneficiary(params);
-    }
-
-    // ===================================
-    // IMPLEMENTATION OF Entity
-    // ===================================
-
-    @Override
-    public void readData(DataKey dataKey) {
-        this.lastSuccessfulCaravan = dataKey.getLong(LAST_SUCCESSFUL_CARAVAN);
-    }
-
-    @Override
-    public void writeData(DataKey dataKey) {
-        dataKey.setLong(LAST_SUCCESSFUL_CARAVAN, lastSuccessfulCaravan);
     }
 
     // ===================================

@@ -1,5 +1,8 @@
 package com.zconami.Caravans.listener;
 
+import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -19,9 +22,6 @@ import com.zconami.Caravans.event.CaravanPostCreateEvent;
 import com.zconami.Caravans.event.RegionDestroyEvent;
 import com.zconami.Caravans.event.RegionInteractEvent;
 import com.zconami.Caravans.event.RegionPreCreateEvent;
-import com.zconami.Caravans.repository.BeneficiaryRepository;
-import com.zconami.Caravans.repository.CaravanRepository;
-import com.zconami.Caravans.repository.RegionRepository;
 
 public class RegionEventListener implements Listener {
 
@@ -29,19 +29,11 @@ public class RegionEventListener implements Listener {
     // ATTRIBUTES
     // ===================================
 
-    private final CaravanRepository caravanRepository;
-    private final BeneficiaryRepository beneficiaryRepository;
-    private final RegionRepository regionRepository;
-
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
-    public RegionEventListener(CaravanRepository caravanRepository, BeneficiaryRepository beneficiaryRepository,
-            RegionRepository regionRepository) {
-        this.caravanRepository = caravanRepository;
-        this.beneficiaryRepository = beneficiaryRepository;
-        this.regionRepository = regionRepository;
+    public RegionEventListener() {
     }
 
     // ===================================
@@ -59,13 +51,14 @@ public class RegionEventListener implements Listener {
         params.setOrigin(event.getIsOrigin());
         params.setDestination(event.getIsDestination());
 
-        regionRepository.save(Region.create(params));
+        getCaravansPlugin().DB.save(Region.create(params));
 
     }
 
     @EventHandler
     public void onRegionInteract(RegionInteractEvent event) {
-        final Region origin = regionRepository.findByName(event.getName());
+        final Region origin = getCaravansPlugin().DB.find(Region.class).where().eq(Region.NAME, event.getName())
+                .findUnique();
         if (origin == null || !origin.isOrigin()) {
             event.getPlayer().sendMessage("Given region does not exist or is not a valid origin!");
             return;
@@ -78,18 +71,23 @@ public class RegionEventListener implements Listener {
 
         final Beneficiary beneficiary = findOrCreate(event.getPlayer());
 
-        final Caravan caravan = caravanRepository.save(Caravan.muleCaravan(beneficiary, origin));
+        final Caravan caravan = Caravan.muleCaravan(beneficiary, origin);
+        getCaravansPlugin().DB.save(caravan);
+
         final CaravanPostCreateEvent caravanCreateEvent = new CaravanPostCreateEvent(caravan);
         Bukkit.getServer().getPluginManager().callEvent(caravanCreateEvent);
     }
 
     @EventHandler
     public void onRegionDestroy(RegionDestroyEvent event) {
-        final Region region = regionRepository.findByName(event.getName());
-        if (caravanRepository.activeFrom(region).isEmpty()) {
-            region.remove();
+        final Region origin = getCaravansPlugin().DB.find(Region.class).where().eq(Region.NAME, event.getName())
+                .findUnique();
+        final List<Caravan> activeCaravansFromOrigin = getCaravansPlugin().DB.find(Caravan.class).where()
+                .eq(Caravan.ORIGIN, origin).findList();
+        if (activeCaravansFromOrigin.isEmpty()) {
+            getCaravansPlugin().DB.delete(origin);
         } else {
-            region.setRemoveAfterLastCaravan(true);
+            origin.setRemoveAfterLastCaravan(true);
         }
     }
 
@@ -98,12 +96,16 @@ public class RegionEventListener implements Listener {
     // ===================================
 
     private Beneficiary findOrCreate(Player player) {
-        final Beneficiary existing = beneficiaryRepository.find(player);
+        final Beneficiary existing = getCaravansPlugin().DB.find(Beneficiary.class).where()
+                .eq(Beneficiary.BUKKIT_ENTITY_ID, player.getUniqueId()).findUnique();
         if (existing != null) {
             return existing;
         }
+
         final BeneficiaryCreateParameters params = new BeneficiaryCreateParameters(player);
-        return beneficiaryRepository.save(Beneficiary.create(params));
+        final Beneficiary newBeneficiary = Beneficiary.create(params);
+        getCaravansPlugin().DB.save(newBeneficiary);
+        return newBeneficiary;
     }
 
 }

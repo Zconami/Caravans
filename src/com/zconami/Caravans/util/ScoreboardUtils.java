@@ -3,6 +3,7 @@ package com.zconami.Caravans.util;
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,8 +28,8 @@ public class ScoreboardUtils {
     // ATTRIBUTES
     // ===================================
 
-    private static final Map<String, Integer> KEY_TASKS = Maps.newHashMap();
-    private static final Map<String, Map<Rel, Scoreboard>> KEY_REL_SCOREBOARD = Maps.newHashMap();
+    private static final Map<UUID, Integer> KEY_TASKS = Maps.newHashMap();
+    private static final Map<UUID, Map<Rel, Scoreboard>> KEY_REL_SCOREBOARD = Maps.newHashMap();
 
     private static final int UPDATE_INTERVAL_TICKS = Utils.ticks(5);
 
@@ -70,28 +71,28 @@ public class ScoreboardUtils {
                 }
             }
         }, 0L, UPDATE_INTERVAL_TICKS));
-        KEY_TASKS.put(caravan.getKey(), taskId);
+        KEY_TASKS.put(caravan.getId(), taskId);
 
-        KEY_REL_SCOREBOARD.put(caravan.getKey(), relScoreboard);
+        KEY_REL_SCOREBOARD.put(caravan.getId(), relScoreboard);
     }
 
     public static void stopScoreboard(Caravan caravan) {
-        final Integer entityTaskId = KEY_TASKS.get(caravan.getKey());
+        final Integer entityTaskId = KEY_TASKS.get(caravan.getId());
         if (entityTaskId != null) {
             final BukkitScheduler scheduler = Bukkit.getScheduler();
             scheduler.cancelTask(entityTaskId.intValue());
         }
-        final Map<Rel, Scoreboard> relScoreboard = KEY_REL_SCOREBOARD.get(caravan.getKey());
+        final Map<Rel, Scoreboard> relScoreboard = KEY_REL_SCOREBOARD.get(caravan.getId());
         for (Scoreboard scoreboard : relScoreboard.values()) {
             scoreboard.getObjective(DisplaySlot.SIDEBAR).unregister();
         }
-        KEY_TASKS.remove(caravan.getKey());
-        KEY_REL_SCOREBOARD.remove(caravan.getKey());
+        KEY_TASKS.remove(caravan.getIdAsString());
+        KEY_REL_SCOREBOARD.remove(caravan.getIdAsString());
     }
 
     public static void showScoreboard(Player player, Caravan caravan) {
         final Rel relation = RelationUtil.getRelationOfThatToMe(caravan.getFaction(), MPlayer.get(player));
-        final Scoreboard scoreboard = KEY_REL_SCOREBOARD.get(caravan.getKey()).get(relation);
+        final Scoreboard scoreboard = KEY_REL_SCOREBOARD.get(caravan.getId()).get(relation);
         player.setScoreboard(scoreboard);
     }
 
@@ -132,7 +133,7 @@ public class ScoreboardUtils {
     }
 
     private static String getKey(Caravan caravan) {
-        return caravan.getKey().substring(0, 15);
+        return caravan.getIdAsString().substring(0, 15);
     }
 
 }

@@ -3,7 +3,7 @@ package com.zconami.Caravans.domain;
 import com.zconami.Caravans.util.NMSUtils;
 
 public abstract class LinkedEntityCreateParameters<BE extends org.bukkit.entity.Entity, ME extends net.minecraft.server.v1_8_R3.Entity>
-        extends EntityCreateParameters {
+        extends BaseEntityCreateParameters {
 
     // ===================================
     // ATTRIBUTES
@@ -22,7 +22,6 @@ public abstract class LinkedEntityCreateParameters<BE extends org.bukkit.entity.
     }
 
     public LinkedEntityCreateParameters(BE bukkitEntity, ME minecraftEntity) {
-        super(bukkitEntity.getUniqueId().toString());
         this.bukkitEntity = bukkitEntity;
         this.minecraftEntity = minecraftEntity;
     }

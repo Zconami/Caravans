@@ -1,14 +1,30 @@
 package com.zconami.Caravans.domain;
 
-import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.logging.log4j.core.helpers.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 
-import com.zconami.Caravans.storage.DataKey;
+import com.avaje.ebean.validation.NotEmpty;
 
-public class Region extends Entity {
+@Entity
+@Table(name = Region.TABLE)
+@UniqueConstraint(columnNames = {
+        Region.NAME
+})
+public class Region extends BaseEntity {
+
+    // ===================================
+    // CONSTANTS
+    // ===================================
+
+    public static final String TABLE = TABLE_PREFIX + "region";
 
     // ===================================
     // CONSTANTS
@@ -21,38 +37,54 @@ public class Region extends Entity {
     // ===================================
 
     public static final String CENTER = "center";
-    public static final String CENTER_WORLD = CENTER + ".world";
-    public static final String CENTER_X = CENTER + ".x";
-    public static final String CENTER_Y = CENTER + ".y";
-    public static final String CENTER_Z = CENTER + ".z";
-    private Location center;
+    public static final String CENTER_X = CENTER + "X";
+    @Column(name = CENTER_X, nullable = false)
+    private double centerX;
+
+    public static final String CENTER_Y = CENTER + "Y";
+    @Column(name = CENTER_Y, nullable = false)
+    private double centerY;
+
+    public static final String CENTER_Z = CENTER + "Z";
+    @Column(name = CENTER_Z, nullable = false)
+    private double centerZ;
+
+    public static final String CENTER_WORLD = CENTER + "World";
+    @Column(name = CENTER_WORLD, nullable = false)
+    @NotEmpty
+    private String centerWorld;
 
     public static final String RADIUS = "radius";
     private int radius;
 
     public static final String NAME = "name";
+    @NotEmpty
     private String name;
 
-    public static final String IS_ORIGIN = "isOrigin";
-    private boolean isOrigin;
+    public static final String IS_ORIGIN = "origin";
+    private boolean origin;
 
-    public static final String IS_DESTINATION = "isDestination";
-    private boolean isDestination;
+    public static final String IS_DESTINATION = "destination";
+    private boolean destination;
 
     public static final String REMOVE_AFTER_LAST_CARAVAN = "removeAfterLastCaravan";
     private boolean removeAfterLastCaravan = false;
+
+    @Transient
+    private Location center;
 
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
-    public Region(DataKey entityData) {
-        super(entityData.getPath(), entityData);
+    public Region() {
+        setTransientLocation();
     }
 
     private Region(RegionCreateParameters params) {
         super(params);
         apply(params);
+        setTransientLocation();
     }
 
     // ===================================
@@ -79,11 +111,11 @@ public class Region extends Entity {
     }
 
     public boolean isOrigin() {
-        return isOrigin;
+        return origin;
     }
 
     public boolean isDestination() {
-        return isDestination;
+        return destination;
     }
 
     public boolean isRemoveAfterLastCaravan() {
@@ -92,7 +124,63 @@ public class Region extends Entity {
 
     public void setRemoveAfterLastCaravan(boolean removeAfterLastCaravan) {
         this.removeAfterLastCaravan = removeAfterLastCaravan;
-        this.setDirty(true);
+    }
+
+    public double getCenterX() {
+        return centerX;
+    }
+
+    public void setCenterX(double centerX) {
+        this.centerX = centerX;
+    }
+
+    public double getCenterY() {
+        return centerY;
+    }
+
+    public void setCenterY(double centerY) {
+        this.centerY = centerY;
+    }
+
+    public double getCenterZ() {
+        return centerZ;
+    }
+
+    public void setCenterZ(double centerZ) {
+        this.centerZ = centerZ;
+    }
+
+    public String getCenterWorld() {
+        return centerWorld;
+    }
+
+    public void setCenterWorld(String centerWorld) {
+        this.centerWorld = centerWorld;
+        setTransientLocation();
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setOrigin(boolean isOrigin) {
+        this.origin = isOrigin;
+    }
+
+    public void setDestination(boolean isDestination) {
+        this.destination = isDestination;
+    }
+
+    public void setCenter(Location location) {
+        this.center = location;
+        this.centerWorld = location.getWorld().getName();
+        this.centerX = location.getX();
+        this.centerY = location.getY();
+        this.centerZ = location.getZ();
     }
 
     public boolean contains(Location location) {
@@ -106,47 +194,19 @@ public class Region extends Entity {
     // PRIVATE METHODS
     // ===================================
 
+    private void setTransientLocation() {
+        if (centerWorld != null) {
+            final World world = Bukkit.getServer().getWorld(centerWorld);
+            this.center = new Location(world, centerX, centerY, centerZ);
+        }
+    }
+
     private void apply(RegionCreateParameters params) {
-        this.center = params.getCenter();
+        setCenter(params.getCenter());
         this.radius = params.getRadius();
         this.name = params.getName();
-        this.isOrigin = params.isOrigin();
-        this.isDestination = params.isDestination();
-    }
-
-    // ===================================
-    // IMPLEMENTATION OF Entity
-    // ===================================
-
-    @Override
-    public void readData(DataKey dataKey) {
-        final UUID worldUUID = UUID.fromString(dataKey.getString(CENTER_WORLD));
-        final double centerX = dataKey.getDouble(CENTER_X);
-        final double centerY = dataKey.getDouble(CENTER_Y);
-        final double centerZ = dataKey.getDouble(CENTER_Z);
-
-        this.center = new Location(Bukkit.getWorld(worldUUID), centerX, centerY, centerZ);
-        this.radius = dataKey.getInt(RADIUS);
-        this.name = dataKey.getString(NAME);
-        this.isOrigin = dataKey.getBoolean(IS_ORIGIN);
-        this.isDestination = dataKey.getBoolean(IS_DESTINATION);
-        this.removeAfterLastCaravan = dataKey.getBoolean(REMOVE_AFTER_LAST_CARAVAN);
-    }
-
-    @Override
-    public void writeData(DataKey dataKey) {
-        dataKey.setString(CENTER_WORLD, center.getWorld().getUID().toString());
-        dataKey.setDouble(CENTER_X, center.getX());
-        dataKey.setDouble(CENTER_Y, center.getY());
-        dataKey.setDouble(CENTER_Z, center.getZ());
-
-        dataKey.setInt(RADIUS, radius);
-
-        dataKey.setString(NAME, name);
-
-        dataKey.setBoolean(IS_ORIGIN, isOrigin);
-        dataKey.setBoolean(IS_DESTINATION, isDestination);
-        dataKey.setBoolean(REMOVE_AFTER_LAST_CARAVAN, removeAfterLastCaravan);
+        this.origin = params.isOrigin();
+        this.destination = params.isDestination();
     }
 
 }

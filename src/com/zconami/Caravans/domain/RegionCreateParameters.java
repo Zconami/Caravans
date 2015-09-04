@@ -2,7 +2,7 @@ package com.zconami.Caravans.domain;
 
 import org.bukkit.Location;
 
-public class RegionCreateParameters extends EntityCreateParameters {
+public class RegionCreateParameters extends BaseEntityCreateParameters {
 
     // ===================================
     // ATTRIBUTES
@@ -20,7 +20,6 @@ public class RegionCreateParameters extends EntityCreateParameters {
     // ===================================
 
     public RegionCreateParameters(String key, String name, Location center, int radius) {
-        super(key);
         this.name = name;
         this.center = center;
         this.radius = radius;

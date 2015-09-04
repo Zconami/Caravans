@@ -5,6 +5,8 @@ import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 
+import com.zconami.Caravans.domain.Caravan;
+
 public class CaravansUtils {
 
     // ===================================
@@ -20,7 +22,8 @@ public class CaravansUtils {
 
     public static boolean isCaravan(Entity entity) {
         if (entity instanceof Horse) {
-            return getCaravansPlugin().getCaravanRepository().find((Horse) entity) != null;
+            return getCaravansPlugin().DB.find(Caravan.class).where().eq(Caravan.BUKKIT_ENTITY_ID, entity.getUniqueId())
+                    .findUnique() != null;
         }
         return false;
     }

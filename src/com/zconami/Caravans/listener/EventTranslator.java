@@ -1,5 +1,6 @@
 package com.zconami.Caravans.listener;
 
+import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 import static com.zconami.Caravans.util.Utils.getLogger;
 import static com.zconami.Caravans.util.Utils.isSignBlock;
 
@@ -33,7 +34,6 @@ import com.zconami.Caravans.event.CaravanMoveEvent;
 import com.zconami.Caravans.event.RegionDestroyEvent;
 import com.zconami.Caravans.event.RegionInteractEvent;
 import com.zconami.Caravans.event.RegionPreCreateEvent;
-import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.util.CaravansUtils;
 
 public class EventTranslator implements Listener {
@@ -42,8 +42,6 @@ public class EventTranslator implements Listener {
     // ATTRIBUTES
     // ===================================
 
-    private final CaravanRepository caravanRepository;
-
     private final Pattern[] signValidators = new Pattern[] {
             Pattern.compile("\\[Caravans\\]"),
             Pattern.compile("(?<regionName>[a-zA-Z0-9_]+)"),
@@ -51,8 +49,7 @@ public class EventTranslator implements Listener {
             Pattern.compile("Imports: (?<bool>Yes|No)")
     };
 
-    public EventTranslator(CaravanRepository caravanRepository) {
-        this.caravanRepository = caravanRepository;
+    public EventTranslator() {
     }
 
     // ===================================
@@ -104,7 +101,8 @@ public class EventTranslator implements Listener {
     public void onPlayerMove(PlayerMoveEvent event) {
         final Entity vehicle = event.getPlayer().getVehicle();
         if (event.getPlayer().isInsideVehicle() && CaravansUtils.isCaravan(vehicle)) {
-            final Caravan caravan = caravanRepository.find((Horse) vehicle);
+            final Caravan caravan = getCaravansPlugin().DB.find(Caravan.class).where()
+                    .eq(Caravan.BUKKIT_ENTITY_ID, vehicle.getUniqueId()).findUnique();
             final CaravanMoveEvent caravanMoveEvent = new CaravanMoveEvent(caravan);
             Bukkit.getServer().getPluginManager().callEvent(caravanMoveEvent);
         }
@@ -114,7 +112,8 @@ public class EventTranslator implements Listener {
     public void onEntityMount(EntityMountEvent event) {
         final Entity mount = event.getMount();
         if (mount instanceof Horse && CaravansUtils.isCaravan((Horse) mount)) {
-            final Caravan caravan = caravanRepository.find((Horse) mount);
+            final Caravan caravan = getCaravansPlugin().DB.find(Caravan.class).where()
+                    .eq(Caravan.BUKKIT_ENTITY_ID, mount.getUniqueId()).findUnique();
             final CaravanMountEvent caravanMountEvent = new CaravanMountEvent(caravan, (Player) event.getEntity());
             Bukkit.getServer().getPluginManager().callEvent(caravanMountEvent);
         }
@@ -124,7 +123,8 @@ public class EventTranslator implements Listener {
     public void onEntityDeath(EntityDeathEvent event) {
         final LivingEntity entity = event.getEntity();
         if (CaravansUtils.isCaravan(entity)) {
-            final Caravan caravan = caravanRepository.find((Horse) entity);
+            final Caravan caravan = getCaravansPlugin().DB.find(Caravan.class).where()
+                    .eq(Caravan.BUKKIT_ENTITY_ID, entity.getUniqueId()).findUnique();
             final CaravanDestroyEvent caravanDestroyEvent = new CaravanDestroyEvent(caravan, entity.getKiller());
             Bukkit.getServer().getPluginManager().callEvent(caravanDestroyEvent);
         }

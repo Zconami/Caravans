@@ -27,8 +27,6 @@ import com.zconami.Caravans.event.CaravanDestroyEvent;
 import com.zconami.Caravans.event.CaravanMountEvent;
 import com.zconami.Caravans.event.CaravanMoveEvent;
 import com.zconami.Caravans.event.CaravanPostCreateEvent;
-import com.zconami.Caravans.repository.CaravanRepository;
-import com.zconami.Caravans.repository.RegionRepository;
 import com.zconami.Caravans.util.CaravansUtils;
 import com.zconami.Caravans.util.ScoreboardUtils;
 import com.zconami.Caravans.util.Utils;
@@ -39,16 +37,11 @@ public class CaravanEventListener implements Listener {
     // ATTRIBUTES
     // ===================================
 
-    private final CaravanRepository caravanRepository;
-    private final RegionRepository regionRepository;
-
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
-    public CaravanEventListener(CaravanRepository caravanRepository, RegionRepository regionRepository) {
-        this.caravanRepository = caravanRepository;
-        this.regionRepository = regionRepository;
+    public CaravanEventListener() {
     }
 
     // ===================================
@@ -117,7 +110,7 @@ public class CaravanEventListener implements Listener {
         final Region origin = caravan.getOrigin();
         if (!origin.contains(location)) {
             if (!resetToOriginIfNotStarted(caravan)) {
-                final List<Region> regions = regionRepository.all();
+                final List<Region> regions = getCaravansPlugin().DB.find(Region.class).findList();
                 for (Region region : regions) {
                     if (region.isDestination() && region.contains(location)) {
                         final Beneficiary beneficiary = caravan.getBeneficiary();
@@ -125,7 +118,7 @@ public class CaravanEventListener implements Listener {
                         final long beneficiaryReturn = caravan.getReturn(region);
                         final GringottsAccount beneficiaryAccount = Gringotts.G.accounting
                                 .getAccount(new PlayerAccountHolder(beneficiary.getBukkitEntity()));
-                        beneficiary.successfulCaravan();
+                        beneficiary.hadSuccessfulCaravan();
 
                         final boolean announceSuccess = getCaravansPlugin().getConfig()
                                 .getBoolean("broadcasts.announceSuccess");
@@ -138,10 +131,11 @@ public class CaravanEventListener implements Listener {
                         }
 
                         beneficiaryAccount.add(beneficiaryReturn);
-                        if (origin.isRemoveAfterLastCaravan() && caravanRepository.activeFrom(origin).size() == 1) {
-                            origin.remove();
+                        if (origin.isRemoveAfterLastCaravan() && getCaravansPlugin().DB.find(Caravan.class).where()
+                                .eq(Caravan.ORIGIN, origin).findRowCount() == 1) {
+                            getCaravansPlugin().DB.delete(origin);
                         }
-                        caravan.remove();
+                        getCaravansPlugin().DB.delete(caravan);
                         break;
                     }
                 }
@@ -167,10 +161,11 @@ public class CaravanEventListener implements Listener {
             Bukkit.getServer().broadcastMessage(announcementBuilder.toString());
 
             final Region origin = caravan.getOrigin();
-            if (origin.isRemoveAfterLastCaravan() && caravanRepository.activeFrom(origin).size() == 1) {
-                origin.remove();
+            if (origin.isRemoveAfterLastCaravan() && getCaravansPlugin().DB.find(Caravan.class).where()
+                    .eq(Caravan.ORIGIN, origin).findRowCount() == 1) {
+                getCaravansPlugin().DB.delete(origin);
             }
-            caravan.remove();
+            getCaravansPlugin().DB.delete(caravan);
         }
     }
 
@@ -178,7 +173,8 @@ public class CaravanEventListener implements Listener {
     public void onInventoryOpen(InventoryOpenEvent event) {
         final InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof Horse && CaravansUtils.isCaravan((Horse) holder)) {
-            final Caravan caravan = caravanRepository.find((Horse) holder);
+            final Caravan caravan = getCaravansPlugin().DB.find(Caravan.class).where()
+                    .eq(Caravan.BUKKIT_ENTITY_ID, ((Entity) holder).getUniqueId()).findUnique();
             if (!event.getPlayer().equals(caravan.getBeneficiary().getBukkitEntity())) {
                 event.getPlayer().sendMessage("Only " + caravan.getBeneficiary().getBukkitEntity().getName()
                         + ", the beneficiary, can access this cargo");
