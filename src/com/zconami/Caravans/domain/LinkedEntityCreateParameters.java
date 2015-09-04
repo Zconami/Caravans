@@ -16,6 +16,7 @@ public abstract class LinkedEntityCreateParameters<BE extends org.bukkit.entity.
     // CONSTRUCTORS
     // ===================================
 
+    @SuppressWarnings("unchecked")
     public LinkedEntityCreateParameters(BE bukkitEntity) {
         this(bukkitEntity, (ME) NMSUtils.getMinecraftEntity(bukkitEntity));
     }

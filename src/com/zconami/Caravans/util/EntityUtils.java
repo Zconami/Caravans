@@ -36,6 +36,7 @@ public class EntityUtils {
         entityCache.remove(key);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Entity> T findBy(String key, Class<T> entityClass) {
         final Entity cached = entityCache.get(key);
         if (cached != null) {

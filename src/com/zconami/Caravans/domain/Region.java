@@ -10,6 +10,12 @@ import com.zconami.Caravans.storage.DataKey;
 public class Region extends Entity {
 
     // ===================================
+    // CONSTANTS
+    // ===================================
+
+    public static final int DEFAULT_RADIUS = 5;
+
+    // ===================================
     // ATTRIBUTES
     // ===================================
 

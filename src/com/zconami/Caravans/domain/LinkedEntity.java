@@ -44,10 +44,12 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
     // PRIVATE METHODS
     // ===================================
 
+    @SuppressWarnings("unchecked")
     private void apply(LinkedEntityCreateParameters<BE, ME> params) {
         this.bukkitEntity = params.getBukkitEntity();
         final ME pMinecraftEntity = params.getMinecraftEntity();
-        this.minecraftEntity = pMinecraftEntity == null ? (ME) NMSUtils.getMinecraftEntity(bukkitEntity) : pMinecraftEntity;
+        this.minecraftEntity = pMinecraftEntity == null ? (ME) NMSUtils.getMinecraftEntity(bukkitEntity)
+                : pMinecraftEntity;
     }
 
     // ===================================

@@ -5,6 +5,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import com.zconami.Caravans.storage.DataKey;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class Entity {
 
     // ===================================
