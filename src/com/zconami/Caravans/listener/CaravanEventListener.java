@@ -23,10 +23,10 @@ import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.domain.Region;
-import com.zconami.Caravans.event.CaravanCreateEvent;
 import com.zconami.Caravans.event.CaravanDestroyEvent;
 import com.zconami.Caravans.event.CaravanMountEvent;
 import com.zconami.Caravans.event.CaravanMoveEvent;
+import com.zconami.Caravans.event.CaravanPostCreateEvent;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
 import com.zconami.Caravans.util.CaravansUtils;
@@ -56,7 +56,7 @@ public class CaravanEventListener implements Listener {
     // ===================================
 
     @EventHandler
-    public void onCaravanCreate(CaravanCreateEvent event) {
+    public void onCaravanCreate(CaravanPostCreateEvent event) {
         getLogger().info("onCaravanCreate");
     }
 
@@ -114,7 +114,8 @@ public class CaravanEventListener implements Listener {
         final Caravan caravan = event.getCaravan();
         final Horse horse = caravan.getBukkitEntity();
         final Location location = horse.getLocation();
-        if (!caravan.getOrigin().contains(location)) {
+        final Region origin = caravan.getOrigin();
+        if (!origin.contains(location)) {
             if (!resetToOriginIfNotStarted(caravan)) {
                 final List<Region> regions = regionRepository.all();
                 for (Region region : regions) {
@@ -137,6 +138,9 @@ public class CaravanEventListener implements Listener {
                         }
 
                         beneficiaryAccount.add(beneficiaryReturn);
+                        if (origin.isRemoveAfterLastCaravan() && caravanRepository.activeFrom(origin).size() == 1) {
+                            origin.remove();
+                        }
                         caravan.remove();
                         break;
                     }
@@ -161,6 +165,11 @@ public class CaravanEventListener implements Listener {
                 announcementBuilder.append("!");
             }
             Bukkit.getServer().broadcastMessage(announcementBuilder.toString());
+
+            final Region origin = caravan.getOrigin();
+            if (origin.isRemoveAfterLastCaravan() && caravanRepository.activeFrom(origin).size() == 1) {
+                origin.remove();
+            }
             caravan.remove();
         }
     }

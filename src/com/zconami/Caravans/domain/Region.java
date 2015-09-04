@@ -2,6 +2,7 @@ package com.zconami.Caravans.domain;
 
 import java.util.UUID;
 
+import org.apache.logging.log4j.core.helpers.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
@@ -38,6 +39,9 @@ public class Region extends Entity {
     public static final String IS_DESTINATION = "isDestination";
     private boolean isDestination;
 
+    public static final String REMOVE_AFTER_LAST_CARAVAN = "removeAfterLastCaravan";
+    private boolean removeAfterLastCaravan = false;
+
     // ===================================
     // CONSTRUCTORS
     // ===================================
@@ -56,6 +60,9 @@ public class Region extends Entity {
     // ===================================
 
     public static Region create(RegionCreateParameters params) {
+        if (Strings.isEmpty(params.getName())) {
+            return null;
+        }
         return new Region(params);
     }
 
@@ -77,6 +84,15 @@ public class Region extends Entity {
 
     public boolean isDestination() {
         return isDestination;
+    }
+
+    public boolean isRemoveAfterLastCaravan() {
+        return removeAfterLastCaravan;
+    }
+
+    public void setRemoveAfterLastCaravan(boolean removeAfterLastCaravan) {
+        this.removeAfterLastCaravan = removeAfterLastCaravan;
+        this.setDirty(true);
     }
 
     public boolean contains(Location location) {
@@ -114,6 +130,7 @@ public class Region extends Entity {
         this.name = dataKey.getString(NAME);
         this.isOrigin = dataKey.getBoolean(IS_ORIGIN);
         this.isDestination = dataKey.getBoolean(IS_DESTINATION);
+        this.removeAfterLastCaravan = dataKey.getBoolean(REMOVE_AFTER_LAST_CARAVAN);
     }
 
     @Override
@@ -129,6 +146,7 @@ public class Region extends Entity {
 
         dataKey.setBoolean(IS_ORIGIN, isOrigin);
         dataKey.setBoolean(IS_DESTINATION, isDestination);
+        dataKey.setBoolean(REMOVE_AFTER_LAST_CARAVAN, removeAfterLastCaravan);
     }
 
 }

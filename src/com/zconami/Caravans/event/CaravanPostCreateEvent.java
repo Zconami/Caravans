@@ -5,7 +5,7 @@ import org.bukkit.event.HandlerList;
 
 import com.zconami.Caravans.domain.Caravan;
 
-public class CaravanCreateEvent extends Event {
+public class CaravanPostCreateEvent extends Event {
 
     // ===================================
     // CONSTANTS
@@ -23,7 +23,7 @@ public class CaravanCreateEvent extends Event {
     // CONSTRUCTORS
     // ===================================
 
-    public CaravanCreateEvent(Caravan caravan) {
+    public CaravanPostCreateEvent(Caravan caravan) {
         this.caravan = caravan;
     }
 

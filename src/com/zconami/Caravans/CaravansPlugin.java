@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.zconami.Caravans.listener.CaravanEventListener;
 import com.zconami.Caravans.listener.EventTranslator;
+import com.zconami.Caravans.listener.RegionEventListener;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
@@ -24,6 +25,7 @@ public class CaravansPlugin extends JavaPlugin {
     private final CaravansCommandExecutor commandExecutor;
     private final EventTranslator eventTranslator;
     private final CaravanEventListener caravanEventListener;
+    private final RegionEventListener regionEventListener;
 
     private final RegionRepository regionRepository;
     private final BeneficiaryRepository beneficiaryRepository;
@@ -43,6 +45,7 @@ public class CaravansPlugin extends JavaPlugin {
         this.commandExecutor = new CaravansCommandExecutor(regionRepository, beneficiaryRepository, caravanRepository);
         this.eventTranslator = new EventTranslator(caravanRepository);
         this.caravanEventListener = new CaravanEventListener(caravanRepository, regionRepository);
+        this.regionEventListener = new RegionEventListener(caravanRepository, beneficiaryRepository, regionRepository);
     }
 
     // ===================================
@@ -74,6 +77,7 @@ public class CaravansPlugin extends JavaPlugin {
         getLogger().info("Registering listeners...");
         getServer().getPluginManager().registerEvents(eventTranslator, this);
         getServer().getPluginManager().registerEvents(caravanEventListener, this);
+        getServer().getPluginManager().registerEvents(regionEventListener, this);
         getLogger().info("=== ENABLE COMPLETE ===");
     }
 
@@ -83,6 +87,7 @@ public class CaravansPlugin extends JavaPlugin {
         getLogger().info("Unregistering listeners...");
         HandlerList.unregisterAll(eventTranslator);
         HandlerList.unregisterAll(caravanEventListener);
+        HandlerList.unregisterAll(regionEventListener);
         getLogger().info("=== DISABLE COMPLETE ===");
     }
 

@@ -62,25 +62,24 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
 
     public E find(String key) {
 
-        final E alreadyLoaded = loaded.get(key);
-        if (alreadyLoaded != null) {
-            return alreadyLoaded;
+        E entity = loaded.get(key);
+        if (entity == null) {
+
+            this.storage.load();
+
+            if (root.keyExists(key)) {
+                getLogger().info("Key exists, loading from storage");
+                // Not in cache, but exists in storage, just hasn't been loaded
+                // yet
+                final DataKey entityData = root.getRelative(key);
+
+                entity = recreate(entityData);
+                loaded.put(key, entity);
+            }
+            getLogger().info("Key does not exist");
         }
-
-        this.storage.load();
-
-        if (root.keyExists(key)) {
-            getLogger().info("Key exists, loading from storage");
-            // Not in cache, but exists in storage, just hasn't been loaded yet
-            final DataKey entityData = root.getRelative(key);
-
-            final E recreated = recreate(entityData);
-            createLookups(recreated);
-            loaded.put(key, recreated);
-            return recreated;
-        }
-        getLogger().info("Key does not exist");
-        return null;
+        createLookups(entity);
+        return entity;
     }
 
     public void saveAll() {
