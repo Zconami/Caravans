@@ -71,7 +71,7 @@ public class RegionEventListener implements Listener {
             return;
         }
 
-        if (MPlayer.get(event.getPlayer()).getFaction().equals(Factions.ID_NONE)) {
+        if (MPlayer.get(event.getPlayer()).getFaction().getId().equals(Factions.ID_NONE)) {
             event.getPlayer().sendMessage("Beneficiary must be in a faction to have a caravan!");
             return;
         }
