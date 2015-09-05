@@ -50,11 +50,11 @@ public class ScoreboardUtils {
             relScoreboard.put(rel, scoreboardWithRelation(caravan, rel));
         }
 
-        final Horse target = caravan.getBukkitEntity();
         final BukkitScheduler scheduler = Bukkit.getScheduler();
         final Integer taskId = Integer.valueOf(scheduler.scheduleSyncRepeatingTask(getCaravansPlugin(), new Runnable() {
             @Override
             public void run() {
+                final Horse target = caravan.getBukkitEntity();
                 if (target.isValid()) {
                     final Location location = target.getLocation();
                     for (Scoreboard scoreboard : relScoreboard.values()) {

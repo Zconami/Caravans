@@ -52,8 +52,8 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
 
         loaded.put(key, entity);
         entity.setDirty(false);
-        createLookups(entity);
-        entity.addObserver(this);
+
+        entityLoaded(entity);
         return entity;
     }
 
@@ -79,8 +79,9 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
             }
             getLogger().log(Level.FINE, "Key " + key + " does not exist");
         }
-        createLookups(entity);
-        entity.addObserver(this);
+        if (entity != null) {
+            entityLoaded(entity);
+        }
         return entity;
     }
 
@@ -94,6 +95,15 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
     public void unload() {
         loaded.values().forEach(this::removeLookups);
         loaded.clear();
+    }
+
+    // ===================================
+    // Private Methods
+    // ===================================
+
+    private void entityLoaded(E entity) {
+        createLookups(entity);
+        entity.addObserver(this);
     }
 
     // ===================================

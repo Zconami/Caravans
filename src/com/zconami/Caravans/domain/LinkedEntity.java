@@ -1,6 +1,7 @@
 package com.zconami.Caravans.domain;
 
 import com.zconami.Caravans.storage.DataKey;
+import com.zconami.Caravans.util.EntityUtils;
 import com.zconami.Caravans.util.NMSUtils;
 
 public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME extends net.minecraft.server.v1_8_R3.Entity>
@@ -13,6 +14,8 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
     private BE bukkitEntity;
 
     private ME minecraftEntity;
+
+    private boolean unloaded = false;
 
     // ===================================
     // CONSTRUCTORS
@@ -32,12 +35,26 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
     // PUBLIC METHODS
     // ===================================
 
+    @SuppressWarnings("unchecked")
     public BE getBukkitEntity() {
+        if (unloaded) {
+            this.bukkitEntity = EntityUtils.findBy(getKey(), getBukkitEntityType());
+            this.minecraftEntity = (ME) NMSUtils.getMinecraftEntity(bukkitEntity);
+            this.unloaded = false;
+        }
         return bukkitEntity;
     }
 
     public ME getNMSEntity() {
         return minecraftEntity;
+    }
+
+    public boolean isUnloaded() {
+        return unloaded;
+    }
+
+    public void setUnloaded(boolean unloaded) {
+        this.unloaded = unloaded;
     }
 
     // ===================================
