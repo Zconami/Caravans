@@ -1,6 +1,6 @@
 caravans:
     oneActivePerFaction: true
-    cooldownAfterSuccess: 300 # In seconds
+    cooldownAfterSuccess: 10800 # In seconds
     profitMultiplyer: # (Distance to objective / blockDivisor) * reward
         blockDivisor: 10
         PvEReward: 0.001
