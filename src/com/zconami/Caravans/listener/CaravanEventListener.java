@@ -57,7 +57,10 @@ public class CaravanEventListener implements Listener {
 
     @EventHandler
     public void onCaravanCreate(CaravanPostCreateEvent event) {
-        getLogger().info("onCaravanCreate");
+        final Caravan caravan = event.getCaravan();
+        final String playerName = caravan.getBeneficiary().getBukkitEntity().getName();
+        getLogger().info(
+                "Caravan created for " + playerName + " with investment of " + Util.format(caravan.getInvestment()));
     }
 
     @EventHandler
@@ -147,7 +150,6 @@ public class CaravanEventListener implements Listener {
                 }
             }
         }
-        getLogger().info("onCaravanMove");
     }
 
     @EventHandler
@@ -179,7 +181,7 @@ public class CaravanEventListener implements Listener {
         final InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof Horse && CaravansUtils.isCaravan((Horse) holder)) {
             final Caravan caravan = caravanRepository.find((Horse) holder);
-            if (!event.getPlayer().equals(caravan.getBeneficiary().getBukkitEntity())) {
+            if (!event.getPlayer().getUniqueId().equals(caravan.getBeneficiary().getBukkitEntity().getUniqueId())) {
                 event.getPlayer().sendMessage("Only " + caravan.getBeneficiary().getBukkitEntity().getName()
                         + ", the beneficiary, can access this cargo");
                 event.setCancelled(true);

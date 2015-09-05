@@ -36,6 +36,10 @@ public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
         this.setDirty(true);
     }
 
+    public long getLastSuccessfulCaravan() {
+        return lastSuccessfulCaravan;
+    }
+
     public static Beneficiary create(BeneficiaryCreateParameters params) {
         return new Beneficiary(params);
     }

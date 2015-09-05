@@ -21,8 +21,6 @@ import com.google.common.collect.Sets;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
-import com.zconami.Caravans.repository.BeneficiaryRepository;
-import com.zconami.Caravans.repository.RegionRepository;
 import com.zconami.Caravans.storage.DataKey;
 import com.zconami.Caravans.util.NMSUtils;
 import com.zconami.Caravans.util.ScoreboardUtils;
@@ -119,9 +117,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     private final Faction faction;
     private final AccountInventory accountInventory;
 
-    private RegionRepository regionRepository;
-    private BeneficiaryRepository beneficiaryRepository;
-
     // ===================================
     // CONSTRUCTORS
     // ===================================
@@ -130,7 +125,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         super(horse, extraData);
         this.accountInventory = new AccountInventory(horse.getInventory());
         this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
-        getRepositories();
     }
 
     private Caravan(CaravanCreateParameters params) {
@@ -140,7 +134,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.origin = params.getOrigin();
         this.profitStrategy = params.getProfitStrategy();
         this.accountInventory = new AccountInventory(params.getBukkitEntity().getInventory());
-        getRepositories();
     }
 
     // ===================================
@@ -220,25 +213,16 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     }
 
     // ===================================
-    // PRIVATE METHODS
-    // ===================================
-
-    public void getRepositories() {
-        this.beneficiaryRepository = getCaravansPlugin().getBeneficiaryRepository();
-        this.regionRepository = getCaravansPlugin().getRegionRepository();
-    }
-
-    // ===================================
     // IMPLEMENTATION OF Entity
     // ===================================
 
     @Override
     public void remove() {
         super.remove();
+        ScoreboardUtils.stopScoreboard(this);
         getBukkitEntity().eject();
         accountInventory.remove(getInvestment());
         getBukkitEntity().remove();
-        ScoreboardUtils.stopScoreboard(this);
     }
 
     @Override
@@ -260,10 +244,10 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
         final UUID ownerUUID = UUID.fromString(dataKey.getString(BENEFICIARY));
         final Player player = Bukkit.getPlayer(ownerUUID);
-        this.beneficiary = beneficiaryRepository.find(player);
+        this.beneficiary = getCaravansPlugin().getBeneficiaryRepository().find(player);
 
         final String originKey = dataKey.getString(ORIGIN);
-        this.origin = regionRepository.find(originKey);
+        this.origin = getCaravansPlugin().getRegionRepository().find(originKey);
 
         final String profitStrategyName = dataKey.getString(PROFIT_STRATEGY);
         this.profitStrategy = ProfitMultiplyerStrategy.valueOf(profitStrategyName);

@@ -5,11 +5,17 @@ import static com.zconami.Caravans.util.Utils.getLogger;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.gestern.gringotts.Util;
 
+import com.massivecraft.factions.entity.Faction;
+import com.massivecraft.factions.entity.MPlayer;
+import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
@@ -44,35 +50,50 @@ public class CaravansCommandExecutor implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         getLogger().info("Command executed: " + command.getName());
-        if (command.getName().equalsIgnoreCase("caravan") && args.length > 0) {
+        if (command.getName().equalsIgnoreCase("c") && args.length > 0) {
             final String secondary = args[0];
-            if (secondary.equalsIgnoreCase("help")) {
-                sender.sendMessage("/caravan help - this help page");
-                sender.sendMessage("/caravan list - lists active caravans with public locations");
-                sender.sendMessage("/caravan track <caravanIndex> - track caravan from list");
-                return true;
-            } else if (secondary.equalsIgnoreCase("list")) {
-                int index = 1;
-                for (Caravan caravan : caravanRepository.all().stream()
+            if (secondary.equalsIgnoreCase("list")) {
+                final List<Caravan> caravans = caravanRepository.all();
+                if (caravans.isEmpty()) {
+                    sender.sendMessage("No pulic caravans, has their location been broadcast yet?");
+                } else {
+                    sender.sendMessage(ChatColor.GOLD + "===≕ Publically Known Caravans ≔==");
+                }
+
+                for (Caravan caravan : caravans.stream()
                         .filter(caravan -> caravan.isCaravanStarted() && caravan.isLocationPublic())
                         .collect(Collectors.toList())) {
-                    sender.sendMessage(index + ": " + caravan.getBeneficiary().getBukkitEntity().getName());
-                    index++;
+                    final StringBuilder builder = new StringBuilder();
+                    builder.append(caravan.getBeneficiary().getBukkitEntity().getName() + " (");
+                    final Faction faction = caravan.getFaction();
+                    if (faction != null) {
+                        builder.append(faction.describeTo(MPlayer.get(sender)) + ChatColor.WHITE + ") ");
+                    }
+                    builder.append(ChatColor.GREEN + Util.format(caravan.getInvestment()));
+                    sender.sendMessage(builder.toString());
                 }
                 return true;
             } else if (secondary.equalsIgnoreCase("track") && args.length == 2 && sender instanceof Player) {
-                final int index = Integer.valueOf(args[1]).intValue() - 1;
-                final List<Caravan> caravans = caravanRepository.all().stream()
-                        .filter(caravan -> caravan.isCaravanStarted() && caravan.isLocationPublic())
-                        .collect(Collectors.toList());
-                if (caravans.size() - 1 >= index) {
-                    final Caravan selected = caravans.get(index);
-                    ScoreboardUtils.showScoreboard((Player) sender, selected);
-                    sender.sendMessage(
-                            "Now tracking " + selected.getBeneficiary().getBukkitEntity().getName() + "'s caravan");
-                } else {
-                    sender.sendMessage("Could not find that caravan, check /caravan list again");
+
+                final String playerName = args[1];
+                final Player player = Bukkit.getPlayer(playerName);
+                if (player == null) {
+                    sender.sendMessage("Can't find that player, are you sure you typed it right?");
                 }
+
+                final Beneficiary targetBeneficiary = beneficiaryRepository.find(player);
+                final Caravan targetCaravan = caravanRepository.findByBeneficiary(targetBeneficiary);
+                if (targetCaravan.isCaravanStarted() && targetCaravan.isLocationPublic()) {
+                    ScoreboardUtils.showScoreboard((Player) sender, targetCaravan);
+                    sender.sendMessage("Now tracking " + playerName + "'s caravan");
+                } else {
+                    sender.sendMessage("Could not find that caravan, has their location been broadcast yet?");
+                }
+                return true;
+            } else {
+                sender.sendMessage("/c help - this help page");
+                sender.sendMessage("/c list - lists active caravans with public locations");
+                sender.sendMessage("/c track <playerName> - track player's caravan");
                 return true;
             }
         }

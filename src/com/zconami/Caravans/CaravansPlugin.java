@@ -73,7 +73,7 @@ public class CaravansPlugin extends JavaPlugin {
         getLogger().info("=== ENABLE START ===");
         this.saveDefaultConfig();
         getLogger().info("Registering command executors...");
-        this.getCommand("caravan").setExecutor(commandExecutor);
+        this.getCommand("c").setExecutor(commandExecutor);
         getLogger().info("Registering listeners...");
         getServer().getPluginManager().registerEvents(eventTranslator, this);
         getServer().getPluginManager().registerEvents(caravanEventListener, this);
@@ -84,6 +84,10 @@ public class CaravansPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("=== DISABLE START ===");
+        getLogger().info("Unloading repositories...");
+        caravanRepository.unload();
+        beneficiaryRepository.unload();
+        regionRepository.unload();
         getLogger().info("Unregistering listeners...");
         HandlerList.unregisterAll(eventTranslator);
         HandlerList.unregisterAll(caravanEventListener);

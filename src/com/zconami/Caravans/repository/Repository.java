@@ -5,7 +5,7 @@ import static com.zconami.Caravans.util.Utils.getLogger;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -52,6 +52,7 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
 
         loaded.put(key, entity);
         entity.setDirty(false);
+        createLookups(entity);
         entity.addObserver(this);
         return entity;
     }
@@ -68,7 +69,7 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
             this.storage.load();
 
             if (root.keyExists(key)) {
-                getLogger().info("Key exists, loading from storage");
+                getLogger().log(Level.FINE, "Key " + key + " exists, loading from storage");
                 // Not in cache, but exists in storage, just hasn't been loaded
                 // yet
                 final DataKey entityData = root.getRelative(key);
@@ -76,16 +77,11 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
                 entity = recreate(entityData);
                 loaded.put(key, entity);
             }
-            getLogger().info("Key does not exist");
+            getLogger().log(Level.FINE, "Key " + key + " does not exist");
         }
         createLookups(entity);
+        entity.addObserver(this);
         return entity;
-    }
-
-    public void saveAll() {
-        for (E dirtyEntity : loaded.values().stream().filter(entity -> entity.isDirty()).collect(Collectors.toList())) {
-            save(dirtyEntity);
-        }
     }
 
     public List<E> all() {
@@ -93,6 +89,11 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
         final List<E> entities = Lists.newArrayList();
         root.getSubKeys().forEach(key -> entities.add(find(key.getPath())));
         return entities;
+    }
+
+    public void unload() {
+        loaded.values().forEach(this::removeLookups);
+        loaded.clear();
     }
 
     // ===================================

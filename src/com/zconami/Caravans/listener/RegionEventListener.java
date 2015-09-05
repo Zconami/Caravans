@@ -1,14 +1,19 @@
 package com.zconami.Caravans.listener;
 
+import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+
 import java.util.UUID;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import com.massivecraft.factions.Factions;
+import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.BeneficiaryCreateParameters;
@@ -66,17 +71,45 @@ public class RegionEventListener implements Listener {
     @EventHandler
     public void onRegionInteract(RegionInteractEvent event) {
         final Region origin = regionRepository.findByName(event.getName());
-        if (origin == null || !origin.isOrigin()) {
-            event.getPlayer().sendMessage("Given region does not exist or is not a valid origin!");
+        if (origin == null) {
+            event.getPlayer().sendMessage("Region not setup properly");
             return;
         }
 
-        if (MPlayer.get(event.getPlayer()).getFaction().getId().equals(Factions.ID_NONE)) {
-            event.getPlayer().sendMessage("Beneficiary must be in a faction to have a caravan!");
+        if (!origin.isOrigin()) {
+            event.getPlayer().sendMessage("This region does not allow exports");
             return;
         }
 
         final Beneficiary beneficiary = findOrCreate(event.getPlayer());
+
+        final boolean exisitingCaravan = caravanRepository.findByBeneficiary(beneficiary) != null;
+        if (exisitingCaravan) {
+            event.getPlayer().sendMessage("You've already got an active caravan!");
+            return;
+        }
+
+        final int cooldownSeconds = getCaravansPlugin().getConfig().getInt("caravans.cooldownAfterSuccess");
+        final long cooldownFinishedMillis = beneficiary.getLastSuccessfulCaravan() + cooldownSeconds * 1000;
+        if (System.currentTimeMillis() < cooldownFinishedMillis) {
+            final java.util.Date cooldownFinisihedDate = new java.util.Date(cooldownFinishedMillis);
+            event.getPlayer().sendMessage("You've had a successful run recently! You can start another at "
+                    + ChatColor.DARK_PURPLE + DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(cooldownFinisihedDate));
+            return;
+        }
+
+        final boolean onePerFaction = getCaravansPlugin().getConfig().getBoolean("caravans.oneActivePerFaction");
+        if (onePerFaction) {
+            final Faction faction = MPlayer.get(event.getPlayer()).getFaction();
+            if (faction.getId().equals(Factions.ID_NONE)) {
+                event.getPlayer().sendMessage("You must be in a faction to have a caravan!");
+                return;
+            }
+            if (caravanRepository.findByFaction(faction) != null) {
+                event.getPlayer().sendMessage("Your faction already has an active caravan!");
+                return;
+            }
+        }
 
         final Caravan caravan = caravanRepository.save(Caravan.muleCaravan(beneficiary, origin));
         final CaravanPostCreateEvent caravanCreateEvent = new CaravanPostCreateEvent(caravan);

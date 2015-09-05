@@ -82,8 +82,10 @@ public class ScoreboardUtils {
             scheduler.cancelTask(entityTaskId.intValue());
         }
         final Map<Rel, Scoreboard> relScoreboard = KEY_REL_SCOREBOARD.get(caravan.getKey());
-        for (Scoreboard scoreboard : relScoreboard.values()) {
-            scoreboard.getObjective(DisplaySlot.SIDEBAR).unregister();
+        if (relScoreboard != null) {
+            for (Scoreboard scoreboard : relScoreboard.values()) {
+                scoreboard.getObjective(DisplaySlot.SIDEBAR).unregister();
+            }
         }
         KEY_TASKS.remove(caravan.getKey());
         KEY_REL_SCOREBOARD.remove(caravan.getKey());

@@ -41,12 +41,12 @@ public class BeneficiaryRepository extends LinkedRepository<Player, EntityPlayer
     }
 
     @Override
-    protected String getEntityName() {
-        return NAME;
+    protected void removeLookups(Beneficiary entity) {
     }
 
     @Override
-    protected void removeLookups(Beneficiary entity) {
+    protected String getEntityName() {
+        return NAME;
     }
 
     // ===================================
