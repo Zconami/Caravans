@@ -25,6 +25,12 @@ import com.zconami.Caravans.util.ScoreboardUtils;
 public class CaravansCommandExecutor implements CommandExecutor {
 
     // ===================================
+    // CONSTANTS
+    // ===================================
+
+    private static final int PAGE_SIZE = 5;
+
+    // ===================================
     // ATTRIBUTES
     // ===================================
 
@@ -53,24 +59,53 @@ public class CaravansCommandExecutor implements CommandExecutor {
         if (command.getName().equalsIgnoreCase("c") && args.length > 0) {
             final String secondary = args[0];
             if (secondary.equalsIgnoreCase("list")) {
-                final List<Caravan> caravans = caravanRepository.all();
-                if (caravans.isEmpty()) {
-                    sender.sendMessage("No pulic caravans, has their location been broadcast yet?");
+                Integer pageNumber;
+                if (args.length > 1) {
+                    try {
+                        pageNumber = Integer.valueOf(args[1]);
+                    } catch (NumberFormatException ex) {
+                        pageNumber = Integer.valueOf(1);
+                    }
                 } else {
-                    sender.sendMessage(ChatColor.GOLD + "===≕ Publically Known Caravans ≔==");
+                    pageNumber = Integer.valueOf(1);
                 }
 
-                for (Caravan caravan : caravans.stream()
+                final List<Caravan> caravans = caravanRepository.all();
+                if (caravans.isEmpty()) {
+                    sender.sendMessage(
+                            "No public caravans at the moment, their locations have to be broadcast before they'll show here");
+                } else {
+                    sender.sendMessage(makeHeader("PUBLICALLY KNOWN CARAVANS"));
+                    sender.sendMessage(ChatColor.GOLD + " Use " + ChatColor.BLUE + "/c track <playerName>"
+                            + ChatColor.GOLD + " to track location");
+                    sender.sendMessage(ChatColor.GOLD + "");
+                }
+
+                final List<Caravan> currentPage;
+                if (caravans.size() <= PAGE_SIZE) {
+                    currentPage = caravans;
+                } else {
+                    final int pageStart = (pageNumber - 1) * PAGE_SIZE;
+                    currentPage = caravans.subList(pageStart, pageStart + PAGE_SIZE);
+                }
+
+                for (Caravan caravan : currentPage.stream()
                         .filter(caravan -> caravan.isCaravanStarted() && caravan.isLocationPublic())
                         .collect(Collectors.toList())) {
                     final StringBuilder builder = new StringBuilder();
-                    builder.append(caravan.getBeneficiary().getBukkitEntity().getName() + " (");
+                    builder.append(" " + ChatColor.WHITE + caravan.getBeneficiary().getBukkitEntity().getName() + " (");
                     final Faction faction = caravan.getFaction();
                     if (faction != null) {
                         builder.append(faction.describeTo(MPlayer.get(sender)) + ChatColor.WHITE + ") ");
                     }
                     builder.append(ChatColor.GREEN + Util.format(caravan.getInvestment()));
                     sender.sendMessage(builder.toString());
+                }
+
+                if (!caravans.isEmpty()) {
+                    sender.sendMessage(ChatColor.GOLD + "");
+                    sender.sendMessage(
+                            ChatColor.GOLD + " Page " + pageNumber + " of " + Math.max(caravans.size() / PAGE_SIZE, 1));
                 }
                 return true;
             } else if (secondary.equalsIgnoreCase("track") && args.length == 2 && sender instanceof Player) {
@@ -98,6 +133,14 @@ public class CaravansCommandExecutor implements CommandExecutor {
             }
         }
         return false;
+    }
+
+    private String makeHeader(String text) {
+        final StringBuilder stringBuilder = new StringBuilder(ChatColor.GOLD + "▀▀▀ " + text + " ");
+        for (int i = 0; i < 40 - text.length(); i++) {
+            stringBuilder.append("▀");
+        }
+        return stringBuilder.toString();
     }
 
 }

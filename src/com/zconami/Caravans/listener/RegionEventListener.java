@@ -113,6 +113,7 @@ public class RegionEventListener implements Listener {
 
         final Caravan caravan = caravanRepository.save(Caravan.muleCaravan(beneficiary, origin));
         final CaravanPostCreateEvent caravanCreateEvent = new CaravanPostCreateEvent(caravan);
+        event.getPlayer().sendMessage("Carvan created at " + caravan.getProfitStrategy().name() + " profit rate");
         Bukkit.getServer().getPluginManager().callEvent(caravanCreateEvent);
     }
 

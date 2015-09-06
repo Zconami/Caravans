@@ -10,6 +10,7 @@ import com.zconami.Caravans.listener.RegionEventListener;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
+import com.zconami.Caravans.util.ScoreboardUtils;
 
 public class CaravansPlugin extends JavaPlugin {
 
@@ -45,8 +46,8 @@ public class CaravansPlugin extends JavaPlugin {
         this.caravanRepository = new CaravanRepository(this);
 
         this.commandExecutor = new CaravansCommandExecutor(regionRepository, beneficiaryRepository, caravanRepository);
-        this.eventTranslator = new EventTranslator(caravanRepository);
-        this.chunkEventListner = new ChunkEventListener(caravanRepository);
+        this.eventTranslator = new EventTranslator(beneficiaryRepository, caravanRepository);
+        this.chunkEventListner = new ChunkEventListener();
         this.caravanEventListener = new CaravanEventListener(caravanRepository, regionRepository);
         this.regionEventListener = new RegionEventListener(caravanRepository, beneficiaryRepository, regionRepository);
     }
@@ -88,6 +89,11 @@ public class CaravansPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("=== DISABLE START ===");
+        getLogger().info("Setting location public for limbo caravans...");
+        caravanRepository.all().stream().filter(caravan -> caravan.isCaravanStarted() && !caravan.isLocationPublic())
+                .forEach(caravan -> caravan.locationIsPublic());
+        getLogger().info("Stopping all scoreboards...");
+        ScoreboardUtils.stopAll();
         getLogger().info("Unloading repositories...");
         caravanRepository.unload();
         beneficiaryRepository.unload();

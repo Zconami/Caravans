@@ -75,6 +75,11 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
                 final DataKey entityData = root.getRelative(key);
 
                 entity = recreate(entityData);
+                if (entity == null) {
+                    getLogger().log(Level.FINE,
+                            "Failed to load bukkit entity for " + key + ", likely in unloaded chunk since restart");
+                    return null;
+                }
                 loaded.put(key, entity);
             }
             getLogger().log(Level.FINE, "Key " + key + " does not exist");
@@ -88,7 +93,12 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
     public List<E> all() {
         this.storage.load();
         final List<E> entities = Lists.newArrayList();
-        root.getSubKeys().forEach(key -> entities.add(find(key.getPath())));
+        root.getSubKeys().forEach(key -> {
+            final E entity = find(key.getPath());
+            if (entity != null) {
+                entities.add(entity);
+            }
+        });
         return entities;
     }
 

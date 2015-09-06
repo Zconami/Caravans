@@ -2,6 +2,7 @@ package com.zconami.Caravans.util;
 
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -76,26 +77,41 @@ public class ScoreboardUtils {
     }
 
     public static void stopScoreboard(Caravan caravan) {
-        final Integer entityTaskId = KEY_TASKS.get(caravan.getKey());
-        if (entityTaskId != null) {
-            final BukkitScheduler scheduler = Bukkit.getScheduler();
-            scheduler.cancelTask(entityTaskId.intValue());
-        }
+        cancelScrboardUpdateTask(caravan);
+
         final Map<Rel, Scoreboard> relScoreboard = KEY_REL_SCOREBOARD.get(caravan.getKey());
         if (relScoreboard != null) {
             for (Scoreboard scoreboard : relScoreboard.values()) {
-                scoreboard.getObjective(DisplaySlot.SIDEBAR).unregister();
+                unregisterObjective(scoreboard);
             }
         }
         KEY_TASKS.remove(caravan.getKey());
         KEY_REL_SCOREBOARD.remove(caravan.getKey());
     }
 
+    public static void stopAll() {
+        KEY_TASKS.values().forEach(ScoreboardUtils::cancelTask);
+        final Collection<Map<Rel, Scoreboard>> relMaps = KEY_REL_SCOREBOARD.values();
+        relMaps.forEach(map -> map.values().forEach(ScoreboardUtils::unregisterObjective));
+    }
+
     public static void showScoreboard(Player player, Caravan caravan) {
         final Rel relation = RelationUtil.getRelationOfThatToMe(caravan.getFaction(), MPlayer.get(player));
+
+        if (!KEY_REL_SCOREBOARD.containsKey(caravan.getKey())) {
+            // If scoreboard isn't setup (perhaps reload or restart), cleanup
+            // and recreate
+            cancelScrboardUpdateTask(caravan);
+            setUpScoreboardCaravanTask(caravan);
+        }
+
         final Scoreboard scoreboard = KEY_REL_SCOREBOARD.get(caravan.getKey()).get(relation);
         player.setScoreboard(scoreboard);
     }
+
+    // ===================================
+    // PRIVATE METHODS
+    // ===================================
 
     private static String getName(Caravan caravan, Rel relation) {
         final String beneficiaryName = caravan.getBeneficiary().getBukkitEntity().getName();
@@ -114,9 +130,21 @@ public class ScoreboardUtils {
         }
     }
 
-    // ===================================
-    // PRIVATE METHODS
-    // ===================================
+    private static void cancelScrboardUpdateTask(Caravan caravan) {
+        final Integer entityTaskId = KEY_TASKS.get(caravan.getKey());
+        cancelTask(entityTaskId);
+    }
+
+    private static void cancelTask(Integer taskId) {
+        if (taskId != null) {
+            final BukkitScheduler scheduler = Bukkit.getScheduler();
+            scheduler.cancelTask(taskId.intValue());
+        }
+    }
+
+    private static void unregisterObjective(Scoreboard scoreboard) {
+        scoreboard.getObjective(DisplaySlot.SIDEBAR).unregister();
+    }
 
     private static Scoreboard scoreboardWithRelation(Caravan caravan, Rel relation) {
         final Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();

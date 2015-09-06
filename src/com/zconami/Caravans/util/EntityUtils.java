@@ -4,9 +4,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class EntityUtils {
@@ -29,11 +31,17 @@ public class EntityUtils {
     // ===================================
 
     public static Entity findBy(String key) {
-        return findBy(key, null);
+        return findBy(key, Entity.class);
     }
 
     public static void removeFromCache(String key) {
         entityCache.remove(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Entity> T findBy(String key, Chunk chunk) {
+        chunk.load(true);
+        return (T) iterateForUUID(Lists.newArrayList(chunk.getEntities()).iterator(), key);
     }
 
     @SuppressWarnings("unchecked")
@@ -45,11 +53,8 @@ public class EntityUtils {
 
         Entity searched = null;
         for (World world : Bukkit.getServer().getWorlds()) {
-            if (entityClass != null) {
-                searched = iterateForUUID((Iterator<Entity>) world.getEntitiesByClass(entityClass).iterator(), key);
-                break;
-            } else {
-                searched = iterateForUUID(world.getEntities().iterator(), key);
+            searched = iterateForUUID((Iterator<Entity>) world.getEntitiesByClass(entityClass).iterator(), key);
+            if (searched != null) {
                 break;
             }
         }

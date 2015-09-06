@@ -16,14 +16,18 @@ import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.gestern.gringotts.AccountInventory;
+import org.gestern.gringotts.Util;
 
 import com.google.common.collect.Sets;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
+import com.zconami.Caravans.CaravansPlugin;
+import com.zconami.Caravans.exception.CaravanCreateBeneficiaryPlayerOfflineException;
 import com.zconami.Caravans.storage.DataKey;
 import com.zconami.Caravans.util.NMSUtils;
 import com.zconami.Caravans.util.ScoreboardUtils;
+import com.zconami.Caravans.util.Utils;
 
 import net.minecraft.server.v1_8_R3.EntityHorse;
 
@@ -100,7 +104,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     // ===================================
 
     public static final String CARAVAN_STARTED = "caravanStarted";
-    private boolean caravanStarted = false;
+    private boolean caravanStarted;
 
     public static final String BENEFICIARY = "beneficiary";
     private Beneficiary beneficiary;
@@ -112,10 +116,9 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     private Region origin;
 
     public static final String LOCATION_PUBLIC = "locationPublic";
-    private boolean locationPublic = false;
+    private boolean locationPublic;
 
     private final Faction faction;
-    private final AccountInventory accountInventory;
 
     // ===================================
     // CONSTRUCTORS
@@ -123,7 +126,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
     public Caravan(Horse horse, DataKey extraData) {
         super(horse, extraData);
-        this.accountInventory = new AccountInventory(horse.getInventory());
         this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
     }
 
@@ -133,7 +135,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
         this.origin = params.getOrigin();
         this.profitStrategy = params.getProfitStrategy();
-        this.accountInventory = new AccountInventory(params.getBukkitEntity().getInventory());
     }
 
     // ===================================
@@ -175,7 +176,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     }
 
     public long getInvestment() {
-        return this.accountInventory.balance();
+        return new AccountInventory(this.getBukkitEntity().getInventory()).balance();
     }
 
     public long getReturn(Region destination) {
@@ -198,6 +199,38 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         if (this.caravanStarted == false) {
             this.caravanStarted = true;
             this.setDirty(true);
+
+            final CaravansPlugin plugin = getCaravansPlugin();
+            final boolean announceStart = plugin.getConfig().getBoolean("broadcasts.announceStart");
+            final int announceLocationDelay = plugin.getConfig().getInt("broadcasts.announceLocationDelay");
+            if (announceStart) {
+                final Horse horse = this.getBukkitEntity();
+                final Location location = horse.getLocation();
+                final String beneficiaryName = this.getBeneficiary().getBukkitEntity().getName();
+                StringBuilder announcementBuilder = new StringBuilder(
+                        String.format("A trade caravan with an investment of §a%s§f has started for %s",
+                                Util.format(this.getInvestment()), beneficiaryName));
+                if (announceLocationDelay <= 0) {
+                    announcementBuilder.append(String.format(" @ %d,%d!", location.getBlockX(), location.getBlockZ()));
+                    ScoreboardUtils.setUpScoreboardCaravanTask(this);
+                    locationIsPublic();
+                } else {
+                    announcementBuilder.append("!");
+                    plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                        @Override
+                        public void run() {
+                            if (getBukkitEntity().isValid()) {
+                                plugin.getServer()
+                                        .broadcastMessage(String.format("The location of %s's caravan is %d,%d",
+                                                beneficiaryName, location.getBlockX(), location.getBlockZ()));
+                                ScoreboardUtils.setUpScoreboardCaravanTask(Caravan.this);
+                                locationIsPublic();
+                            }
+                        }
+                    }, Utils.ticks(announceLocationDelay));
+                }
+                Bukkit.getServer().broadcastMessage(announcementBuilder.toString());
+            }
         }
     }
 
@@ -212,6 +245,10 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         }
     }
 
+    public ProfitMultiplyerStrategy getProfitStrategy() {
+        return this.profitStrategy;
+    }
+
     // ===================================
     // IMPLEMENTATION OF Entity
     // ===================================
@@ -221,29 +258,31 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         super.remove();
         ScoreboardUtils.stopScoreboard(this);
         getBukkitEntity().eject();
-        accountInventory.remove(getInvestment());
+        new AccountInventory(this.getBukkitEntity().getInventory()).remove(getInvestment());
         getBukkitEntity().remove();
     }
 
     @Override
     public void writeData(DataKey dataKey) {
+        super.writeData(dataKey);
         dataKey.setBoolean(CARAVAN_STARTED, caravanStarted);
-
         dataKey.setString(BENEFICIARY, beneficiary.getKey());
-
         dataKey.setString(ORIGIN, origin.getKey());
-
         dataKey.setString(PROFIT_STRATEGY, profitStrategy.name());
-
         dataKey.setBoolean(LOCATION_PUBLIC, locationPublic);
     }
 
     @Override
     public void readData(DataKey dataKey) {
+        super.readData(dataKey);
         this.caravanStarted = dataKey.getBoolean(CARAVAN_STARTED);
 
         final UUID ownerUUID = UUID.fromString(dataKey.getString(BENEFICIARY));
         final Player player = Bukkit.getPlayer(ownerUUID);
+        if (player == null) {
+            throw new CaravanCreateBeneficiaryPlayerOfflineException(dataKey.getPath());
+        }
+
         this.beneficiary = getCaravansPlugin().getBeneficiaryRepository().find(player);
 
         final String originKey = dataKey.getString(ORIGIN);

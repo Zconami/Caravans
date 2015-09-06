@@ -50,11 +50,13 @@ public class Beneficiary extends LinkedEntity<Player, EntityPlayer> {
 
     @Override
     public void readData(DataKey dataKey) {
+        super.readData(dataKey);
         this.lastSuccessfulCaravan = dataKey.getLong(LAST_SUCCESSFUL_CARAVAN);
     }
 
     @Override
     public void writeData(DataKey dataKey) {
+        super.writeData(dataKey);
         dataKey.setLong(LAST_SUCCESSFUL_CARAVAN, lastSuccessfulCaravan);
     }
 

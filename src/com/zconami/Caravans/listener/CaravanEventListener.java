@@ -19,7 +19,6 @@ import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.Util;
 import org.gestern.gringotts.accountholder.PlayerAccountHolder;
 
-import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.domain.Region;
@@ -30,8 +29,6 @@ import com.zconami.Caravans.event.CaravanPostCreateEvent;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
 import com.zconami.Caravans.util.CaravansUtils;
-import com.zconami.Caravans.util.ScoreboardUtils;
-import com.zconami.Caravans.util.Utils;
 
 public class CaravanEventListener implements Listener {
 
@@ -74,40 +71,11 @@ public class CaravanEventListener implements Listener {
         } else {
             if (!caravan.isCaravanStarted()) {
                 if (!caravan.getOrigin().contains(horse.getLocation())) {
-                    resetToOriginIfNotStarted(caravan, false);
+                    // Tried to start a caravan outside of origin, probably
+                    // abuse attempt by pushing horse
+                    resetToOrigin(caravan, false);
                 }
                 caravan.caravanHasStarted();
-                final CaravansPlugin plugin = getCaravansPlugin();
-                final boolean announceStart = plugin.getConfig().getBoolean("broadcasts.announceStart");
-                final int announceLocationDelay = plugin.getConfig().getInt("broadcasts.announceLocationDelay");
-                if (announceStart) {
-                    final Location location = horse.getLocation();
-                    final String beneficiaryName = caravan.getBeneficiary().getBukkitEntity().getName();
-                    StringBuilder announcementBuilder = new StringBuilder(
-                            String.format("A trade caravan with an investment of §a%s§f has started for %s",
-                                    Util.format(caravan.getInvestment()), beneficiaryName));
-                    if (announceLocationDelay <= 0) {
-                        announcementBuilder
-                                .append(String.format(" @ %d,%d!", location.getBlockX(), location.getBlockZ()));
-                        ScoreboardUtils.setUpScoreboardCaravanTask(caravan);
-                        caravan.locationIsPublic();
-                    } else {
-                        announcementBuilder.append("!");
-                        plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
-                            @Override
-                            public void run() {
-                                if (caravan.getBukkitEntity().isValid()) {
-                                    plugin.getServer()
-                                            .broadcastMessage(String.format("The location of %s's caravan is %d,%d",
-                                                    beneficiaryName, location.getBlockX(), location.getBlockZ()));
-                                    ScoreboardUtils.setUpScoreboardCaravanTask(caravan);
-                                    caravan.locationIsPublic();
-                                }
-                            }
-                        }, Utils.ticks(announceLocationDelay));
-                    }
-                    Bukkit.getServer().broadcastMessage(announcementBuilder.toString());
-                }
             }
         }
     }
@@ -118,8 +86,22 @@ public class CaravanEventListener implements Listener {
         final Horse horse = caravan.getBukkitEntity();
         final Location location = horse.getLocation();
         final Region origin = caravan.getOrigin();
-        if (!origin.contains(location)) {
-            if (!resetToOriginIfNotStarted(caravan)) {
+
+        if (!location.getChunk().equals(caravan.getChunk())) {
+            caravan.setChunk(location.getChunk());
+        }
+
+        final boolean hasLeftOrigin = !origin.contains(location);
+        if (hasLeftOrigin) {
+            if (!caravan.isCaravanStarted()) {
+                if (caravan.getInvestment() <= 0) {
+                    // Hasn't started yet, bring back to origin
+                    resetToOrigin(caravan, true);
+                } else {
+                    // Has investment, so start caravan
+                    caravan.caravanHasStarted();
+                }
+            } else {
                 final List<Region> regions = regionRepository.all();
                 for (Region region : regions) {
                     if (region.isDestination() && region.contains(location)) {
@@ -197,27 +179,19 @@ public class CaravanEventListener implements Listener {
     // PRIVATE METHODS
     // ===================================
 
-    private boolean resetToOriginIfNotStarted(Caravan caravan) {
-        return resetToOriginIfNotStarted(caravan, true);
-    }
-
-    private boolean resetToOriginIfNotStarted(Caravan caravan, boolean remount) {
+    private void resetToOrigin(Caravan caravan, boolean remount) {
         final Horse horse = caravan.getBukkitEntity();
-        if (!caravan.isCaravanStarted()) {
-            final Entity passenger = horse.getPassenger();
-            final Location teleportLocation = caravan.getOrigin().getCenter();
-            horse.eject();
-            horse.teleport(teleportLocation);
-            if (passenger != null) {
-                passenger.sendMessage("You must start the caravan before leaving the region!");
-                passenger.teleport(teleportLocation);
-                if (remount) {
-                    horse.setPassenger(passenger);
-                }
+        final Entity passenger = horse.getPassenger();
+        final Location teleportLocation = caravan.getOrigin().getCenter();
+        horse.eject();
+        horse.teleport(teleportLocation);
+        if (passenger != null) {
+            passenger.sendMessage("You must start the caravan before leaving the region!");
+            passenger.teleport(teleportLocation);
+            if (remount) {
+                horse.setPassenger(passenger);
             }
-            return true;
         }
-        return false;
     }
 
 }

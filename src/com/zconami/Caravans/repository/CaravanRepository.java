@@ -12,6 +12,7 @@ import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.domain.Region;
+import com.zconami.Caravans.exception.CaravanCreateBeneficiaryPlayerOfflineException;
 import com.zconami.Caravans.storage.DataKey;
 
 import net.minecraft.server.v1_8_R3.EntityHorse;
@@ -100,7 +101,11 @@ public class CaravanRepository extends LinkedRepository<Horse, EntityHorse, Cara
 
     @Override
     protected Caravan recreate(Horse horse, DataKey entityData) {
-        return new Caravan(horse, entityData);
+        try {
+            return new Caravan(horse, entityData);
+        } catch (CaravanCreateBeneficiaryPlayerOfflineException ex) {
+            return null;
+        }
     }
 
 }

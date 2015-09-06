@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
@@ -26,6 +27,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 import com.google.common.collect.Lists;
+import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.event.CaravanDestroyEvent;
 import com.zconami.Caravans.event.CaravanMountEvent;
@@ -33,6 +35,7 @@ import com.zconami.Caravans.event.CaravanMoveEvent;
 import com.zconami.Caravans.event.RegionDestroyEvent;
 import com.zconami.Caravans.event.RegionInteractEvent;
 import com.zconami.Caravans.event.RegionPreCreateEvent;
+import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.util.CaravansUtils;
 
@@ -42,6 +45,7 @@ public class EventTranslator implements Listener {
     // ATTRIBUTES
     // ===================================
 
+    private final BeneficiaryRepository beneficiaryRepository;
     private final CaravanRepository caravanRepository;
 
     private final Pattern[] signValidators = new Pattern[] {
@@ -51,7 +55,8 @@ public class EventTranslator implements Listener {
             Pattern.compile("Imports: (?<bool>Yes|No)")
     };
 
-    public EventTranslator(CaravanRepository caravanRepository) {
+    public EventTranslator(BeneficiaryRepository beneficiaryRepository, CaravanRepository caravanRepository) {
+        this.beneficiaryRepository = beneficiaryRepository;
         this.caravanRepository = caravanRepository;
     }
 
@@ -102,8 +107,15 @@ public class EventTranslator implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-        final Entity vehicle = event.getPlayer().getVehicle();
-        if (event.getPlayer().isInsideVehicle() && CaravansUtils.isCaravan(vehicle)) {
+        final Player player = event.getPlayer();
+        final Beneficiary beneficiary = beneficiaryRepository.find(player);
+        final Chunk playerChunk = player.getLocation().getChunk();
+        if (!beneficiary.getChunk().equals(playerChunk)) {
+            beneficiary.setChunk(playerChunk);
+        }
+
+        final Entity vehicle = player.getVehicle();
+        if (player.isInsideVehicle() && CaravansUtils.isCaravan(vehicle)) {
             final Caravan caravan = caravanRepository.find((Horse) vehicle);
             final CaravanMoveEvent caravanMoveEvent = new CaravanMoveEvent(caravan);
             Bukkit.getServer().getPluginManager().callEvent(caravanMoveEvent);
