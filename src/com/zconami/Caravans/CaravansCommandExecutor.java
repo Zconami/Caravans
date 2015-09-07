@@ -5,7 +5,6 @@ import static com.zconami.Caravans.util.Utils.getLogger;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -93,7 +92,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
                         .filter(caravan -> caravan.isCaravanStarted() && caravan.isLocationPublic())
                         .collect(Collectors.toList())) {
                     final StringBuilder builder = new StringBuilder();
-                    builder.append(" " + ChatColor.WHITE + caravan.getBeneficiary().getBukkitEntity().getName() + " (");
+                    builder.append(" " + ChatColor.WHITE + caravan.getBeneficiary().getName() + " (");
                     final Faction faction = caravan.getFaction();
                     if (faction != null) {
                         builder.append(faction.describeTo(MPlayer.get(sender)) + ChatColor.WHITE + ") ");
@@ -111,12 +110,11 @@ public class CaravansCommandExecutor implements CommandExecutor {
             } else if (secondary.equalsIgnoreCase("track") && args.length == 2 && sender instanceof Player) {
 
                 final String playerName = args[1];
-                final Player player = Bukkit.getPlayer(playerName);
-                if (player == null) {
+                final Beneficiary targetBeneficiary = beneficiaryRepository.findByName(playerName);
+                if (targetBeneficiary == null) {
                     sender.sendMessage("Can't find that player, are you sure you typed it right?");
                 }
 
-                final Beneficiary targetBeneficiary = beneficiaryRepository.find(player);
                 final Caravan targetCaravan = caravanRepository.findByBeneficiary(targetBeneficiary);
                 if (targetCaravan.isCaravanStarted() && targetCaravan.isLocationPublic()) {
                     ScoreboardUtils.showScoreboard((Player) sender, targetCaravan);

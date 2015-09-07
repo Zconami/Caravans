@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
@@ -27,7 +26,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 import com.google.common.collect.Lists;
-import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.event.CaravanDestroyEvent;
 import com.zconami.Caravans.event.CaravanMountEvent;
@@ -108,12 +106,6 @@ public class EventTranslator implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         final Player player = event.getPlayer();
-        final Beneficiary beneficiary = beneficiaryRepository.find(player);
-        final Chunk playerChunk = player.getLocation().getChunk();
-        if (!beneficiary.getChunk().equals(playerChunk)) {
-            beneficiary.setChunk(playerChunk);
-        }
-
         final Entity vehicle = player.getVehicle();
         if (player.isInsideVehicle() && CaravansUtils.isCaravan(vehicle)) {
             final Caravan caravan = caravanRepository.find((Horse) vehicle);

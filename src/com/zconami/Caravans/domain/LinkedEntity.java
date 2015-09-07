@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 
 import com.zconami.Caravans.storage.DataKey;
 import com.zconami.Caravans.util.EntityUtils;
@@ -79,7 +80,12 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
         final UUID worldUUID = UUID.fromString(dataKey.getString(CHUNK_WORLD));
         final int chunkX = dataKey.getInt(CHUNK_X);
         final int chunkZ = dataKey.getInt(CHUNK_Z);
-        return Bukkit.getWorld(worldUUID).getChunkAt(chunkX, chunkZ);
+        final World world = Bukkit.getWorld(worldUUID);
+        if (world == null) {
+            getLogger().info("Can't find chunk's world for persisted entity " + dataKey.getPath());
+            return null;
+        }
+        return world.getChunkAt(chunkX, chunkZ);
     }
 
     // ===================================

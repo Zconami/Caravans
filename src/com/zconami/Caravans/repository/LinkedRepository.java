@@ -1,5 +1,7 @@
 package com.zconami.Caravans.repository;
 
+import static com.zconami.Caravans.util.Utils.getLogger;
+
 import org.bukkit.Chunk;
 
 import com.zconami.Caravans.CaravansPlugin;
@@ -29,11 +31,11 @@ public abstract class LinkedRepository<BE extends org.bukkit.entity.Entity, ME e
     public E recreate(DataKey entityData) {
         final String key = entityData.getPath();
         final Chunk chunkFromData = LinkedEntity.getChunkFromData(entityData);
-        if (!chunkFromData.isLoaded()) {
-            chunkFromData.load(true);
-        }
-        final BE bukkitEntity = EntityUtils.findBy(key, getBukkitEntityType());
+        final BE bukkitEntity = EntityUtils.findBy(key, chunkFromData);
         if (bukkitEntity == null) {
+            getLogger().info("Failed to find bukkitEntity for [" + getEntityName() + ":" + key + "], chunk "
+                    + (chunkFromData.isLoaded() ? "is (world probably isn't)" : "is NOT")
+                    + " loaded. Can't recreate entity as a result!");
             return null;
         }
         return recreate(bukkitEntity, entityData);

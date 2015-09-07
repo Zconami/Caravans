@@ -5,7 +5,10 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import com.zconami.Caravans.storage.DataKey;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({
+        "unchecked",
+        "rawtypes"
+})
 public abstract class Entity {
 
     // ===================================
@@ -72,7 +75,6 @@ public abstract class Entity {
 
     private void apply(EntityCreateParameters params) {
         this.key = params.getKey();
-
     }
 
     // ===================================

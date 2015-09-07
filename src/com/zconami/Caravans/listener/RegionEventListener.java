@@ -82,6 +82,10 @@ public class RegionEventListener implements Listener {
         }
 
         final Beneficiary beneficiary = findOrCreate(event.getPlayer());
+        final Faction playerFaction = MPlayer.get(event.getPlayer()).getFaction();
+        if (!beneficiary.getFaction().getId().equals(playerFaction.getId())) {
+            beneficiary.setFaction(playerFaction);
+        }
 
         final boolean exisitingCaravan = caravanRepository.findByBeneficiary(beneficiary) != null;
         if (exisitingCaravan) {
@@ -100,12 +104,11 @@ public class RegionEventListener implements Listener {
 
         final boolean onePerFaction = getCaravansPlugin().getConfig().getBoolean("caravans.oneActivePerFaction");
         if (onePerFaction) {
-            final Faction faction = MPlayer.get(event.getPlayer()).getFaction();
-            if (faction.getId().equals(Factions.ID_NONE)) {
+            if (playerFaction.getId().equals(Factions.ID_NONE)) {
                 event.getPlayer().sendMessage("You must be in a faction to have a caravan!");
                 return;
             }
-            if (caravanRepository.findByFaction(faction) != null) {
+            if (caravanRepository.findByFaction(playerFaction) != null) {
                 event.getPlayer().sendMessage("Your faction already has an active caravan!");
                 return;
             }
@@ -132,7 +135,7 @@ public class RegionEventListener implements Listener {
     // ===================================
 
     private Beneficiary findOrCreate(Player player) {
-        final Beneficiary existing = beneficiaryRepository.find(player);
+        final Beneficiary existing = beneficiaryRepository.find(player.getUniqueId().toString());
         if (existing != null) {
             return existing;
         }

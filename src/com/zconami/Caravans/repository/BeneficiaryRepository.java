@@ -1,20 +1,21 @@
 package com.zconami.Caravans.repository;
 
-import org.bukkit.entity.Player;
+import java.util.Map;
 
+import com.google.common.collect.Maps;
 import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.storage.DataKey;
 
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-
-public class BeneficiaryRepository extends LinkedRepository<Player, EntityPlayer, Beneficiary> {
+public class BeneficiaryRepository extends Repository<Beneficiary> {
 
     // ===================================
     // ATTRIBUTES
     // ===================================
 
     private static final String NAME = "beneficiary";
+
+    private static final Map<String, Beneficiary> nameLookup = Maps.newHashMap();
 
     // ===================================
     // CONSTRUCTORS
@@ -32,16 +33,17 @@ public class BeneficiaryRepository extends LinkedRepository<Player, EntityPlayer
         return super.save(beneficiary);
     }
 
+    public Beneficiary findByName(String name) {
+        return nameLookup.get(name);
+    }
+
     // ===================================
     // IMPLEMENTATION OF Repository
     // ===================================
 
     @Override
-    protected void createLookups(Beneficiary entity) {
-    }
-
-    @Override
-    protected void removeLookups(Beneficiary entity) {
+    protected Beneficiary recreate(DataKey entityData) {
+        return new Beneficiary(entityData);
     }
 
     @Override
@@ -49,18 +51,14 @@ public class BeneficiaryRepository extends LinkedRepository<Player, EntityPlayer
         return NAME;
     }
 
-    // ===================================
-    // IMPLEMENTATION OF LinkedRepository
-    // ===================================
-
     @Override
-    protected Class<Player> getBukkitEntityType() {
-        return Player.class;
+    protected void createLookups(Beneficiary beneficiary) {
+        nameLookup.put(beneficiary.getName(), beneficiary);
     }
 
     @Override
-    protected Beneficiary recreate(Player player, DataKey extraData) {
-        return new Beneficiary(player, extraData);
+    protected void removeLookups(Beneficiary beneficiary) {
+        nameLookup.remove(beneficiary.getName());
     }
 
 }

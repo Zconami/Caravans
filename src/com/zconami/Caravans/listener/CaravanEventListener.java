@@ -4,9 +4,11 @@ import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 import static com.zconami.Caravans.util.Utils.getLogger;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.event.EventHandler;
@@ -55,7 +57,7 @@ public class CaravanEventListener implements Listener {
     @EventHandler
     public void onCaravanCreate(CaravanPostCreateEvent event) {
         final Caravan caravan = event.getCaravan();
-        final String playerName = caravan.getBeneficiary().getBukkitEntity().getName();
+        final String playerName = caravan.getBeneficiary().getName();
         getLogger().info(
                 "Caravan created for " + playerName + " with investment of " + Util.format(caravan.getInvestment()));
     }
@@ -106,10 +108,9 @@ public class CaravanEventListener implements Listener {
                 for (Region region : regions) {
                     if (region.isDestination() && region.contains(location)) {
                         final Beneficiary beneficiary = caravan.getBeneficiary();
-                        final String beneficiaryName = beneficiary.getBukkitEntity().getName();
+                        final String beneficiaryName = beneficiary.getName();
                         final long beneficiaryReturn = caravan.getReturn(region);
-                        final GringottsAccount beneficiaryAccount = Gringotts.G.accounting
-                                .getAccount(new PlayerAccountHolder(beneficiary.getBukkitEntity()));
+
                         beneficiary.successfulCaravan();
 
                         final boolean announceSuccess = getCaravansPlugin().getConfig()
@@ -122,6 +123,10 @@ public class CaravanEventListener implements Listener {
                             Bukkit.getServer().broadcastMessage(announcement);
                         }
 
+                        final OfflinePlayer offlinePlayer = Bukkit
+                                .getOfflinePlayer(UUID.fromString(beneficiary.getKey()));
+                        final GringottsAccount beneficiaryAccount = Gringotts.G.accounting
+                                .getAccount(new PlayerAccountHolder(offlinePlayer));
                         beneficiaryAccount.add(beneficiaryReturn);
                         if (origin.isRemoveAfterLastCaravan() && caravanRepository.activeFrom(origin).size() == 1) {
                             origin.remove();
@@ -139,7 +144,7 @@ public class CaravanEventListener implements Listener {
         final boolean announceDestroy = getCaravansPlugin().getConfig().getBoolean("broadcasts.announceDestory");
         if (announceDestroy) {
             final Caravan caravan = event.getCaravan();
-            final String beneficiaryName = caravan.getBeneficiary().getBukkitEntity().getName();
+            final String beneficiaryName = caravan.getBeneficiary().getName();
             final StringBuilder announcementBuilder = new StringBuilder(
                     String.format("%s's trade caravan with an investment of §a%s§f was destroyed", beneficiaryName,
                             Util.format(caravan.getInvestment())));
@@ -163,9 +168,9 @@ public class CaravanEventListener implements Listener {
         final InventoryHolder holder = event.getInventory().getHolder();
         if (holder instanceof Horse && CaravansUtils.isCaravan((Horse) holder)) {
             final Caravan caravan = caravanRepository.find((Horse) holder);
-            if (!event.getPlayer().getUniqueId().equals(caravan.getBeneficiary().getBukkitEntity().getUniqueId())) {
-                event.getPlayer().sendMessage("Only " + caravan.getBeneficiary().getBukkitEntity().getName()
-                        + ", the beneficiary, can access this cargo");
+            if (!event.getPlayer().getUniqueId().toString().equals(caravan.getBeneficiary().getKey())) {
+                event.getPlayer().sendMessage(
+                        "Only " + caravan.getBeneficiary().getName() + ", the beneficiary, can access this cargo");
                 event.setCancelled(true);
             } else if (caravan.isCaravanStarted()) {
                 event.setCancelled(true);

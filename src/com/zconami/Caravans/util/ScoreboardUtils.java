@@ -114,7 +114,7 @@ public class ScoreboardUtils {
     // ===================================
 
     private static String getName(Caravan caravan, Rel relation) {
-        final String beneficiaryName = caravan.getBeneficiary().getBukkitEntity().getName();
+        final String beneficiaryName = caravan.getBeneficiary().getName();
         final String factionName = relation.getColor() + caravan.getFaction().getName();
         if (beneficiaryName.length() > 30) {
             return beneficiaryName.substring(0, 27) + "...";

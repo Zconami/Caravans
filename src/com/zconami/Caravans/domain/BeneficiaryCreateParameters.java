@@ -2,16 +2,38 @@ package com.zconami.Caravans.domain;
 
 import org.bukkit.entity.Player;
 
-import net.minecraft.server.v1_8_R3.EntityPlayer;
+import com.massivecraft.factions.entity.Faction;
+import com.massivecraft.factions.entity.MPlayer;
 
-public class BeneficiaryCreateParameters extends LinkedEntityCreateParameters<Player, EntityPlayer> {
+public class BeneficiaryCreateParameters extends EntityCreateParameters {
+
+    // ===================================
+    // ATTRIBUTES
+    // ===================================
+
+    private final String name;
+    private final Faction faction;
 
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
     public BeneficiaryCreateParameters(Player player) {
-        super(player);
+        super(player.getUniqueId().toString());
+        this.name = player.getName();
+        this.faction = MPlayer.get(player).getFaction();
+    }
+
+    // ===================================
+    // PUBLIC METHODS
+    // ===================================
+
+    public String getName() {
+        return name;
+    }
+
+    public Faction getFaction() {
+        return faction;
     }
 
 }

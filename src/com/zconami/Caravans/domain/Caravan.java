@@ -126,13 +126,13 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
     public Caravan(Horse horse, DataKey extraData) {
         super(horse, extraData);
-        this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
+        this.faction = beneficiary.getFaction();
     }
 
     private Caravan(CaravanCreateParameters params) {
         super(params);
         this.beneficiary = params.getBeneficiary();
-        this.faction = MPlayer.get(beneficiary.getBukkitEntity()).getFaction();
+        this.faction = beneficiary.getFaction();
         this.origin = params.getOrigin();
         this.profitStrategy = params.getProfitStrategy();
     }
@@ -206,7 +206,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
             if (announceStart) {
                 final Horse horse = this.getBukkitEntity();
                 final Location location = horse.getLocation();
-                final String beneficiaryName = this.getBeneficiary().getBukkitEntity().getName();
+                final String beneficiaryName = this.getBeneficiary().getName();
                 StringBuilder announcementBuilder = new StringBuilder(
                         String.format("A trade caravan with an investment of §a%s§f has started for %s",
                                 Util.format(this.getInvestment()), beneficiaryName));
@@ -283,7 +283,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
             throw new CaravanCreateBeneficiaryPlayerOfflineException(dataKey.getPath());
         }
 
-        this.beneficiary = getCaravansPlugin().getBeneficiaryRepository().find(player);
+        this.beneficiary = getCaravansPlugin().getBeneficiaryRepository().find(player.getUniqueId().toString());
 
         final String originKey = dataKey.getString(ORIGIN);
         this.origin = getCaravansPlugin().getRegionRepository().find(originKey);

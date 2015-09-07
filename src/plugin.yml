@@ -2,6 +2,8 @@ name: Caravans
 main: com.zconami.Caravans.CaravansPlugin
 depend: [Factions, Gringotts]
 version: 1.0
+authors: [Autonomy]
+website: http://zconami.com/
 commands:
   c:
     description: Use the help pages to find a command
