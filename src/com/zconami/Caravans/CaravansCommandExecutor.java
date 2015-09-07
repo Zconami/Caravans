@@ -113,6 +113,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
                 final Beneficiary targetBeneficiary = beneficiaryRepository.findByName(playerName);
                 if (targetBeneficiary == null) {
                     sender.sendMessage("Can't find that player, are you sure you typed it right?");
+                    return true;
                 }
 
                 final Caravan targetCaravan = caravanRepository.findByBeneficiary(targetBeneficiary);

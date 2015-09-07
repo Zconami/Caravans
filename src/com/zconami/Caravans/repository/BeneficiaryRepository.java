@@ -34,7 +34,7 @@ public class BeneficiaryRepository extends Repository<Beneficiary> {
     }
 
     public Beneficiary findByName(String name) {
-        return nameLookup.get(name);
+        return nameLookup.get(name.toLowerCase());
     }
 
     // ===================================
@@ -53,12 +53,12 @@ public class BeneficiaryRepository extends Repository<Beneficiary> {
 
     @Override
     protected void createLookups(Beneficiary beneficiary) {
-        nameLookup.put(beneficiary.getName(), beneficiary);
+        nameLookup.put(beneficiary.getName().toLowerCase(), beneficiary);
     }
 
     @Override
     protected void removeLookups(Beneficiary beneficiary) {
-        nameLookup.remove(beneficiary.getName());
+        nameLookup.remove(beneficiary.getName().toLowerCase());
     }
 
 }
