@@ -3,10 +3,10 @@ package com.zconami.Caravans.util;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.bukkit.Chunk;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class EntityUtils {
@@ -33,13 +33,23 @@ public class EntityUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Entity> T findBy(String key, Chunk chunk) {
-        if (chunk == null) {
-            return null;
+    public static <T extends Entity> T findBy(String key, Class<T> entityClass) {
+        final Entity cached = entityCache.get(key);
+        if (cached != null) {
+            return (T) cached;
         }
 
-        chunk.load(true);
-        return (T) iterateForUUID(Lists.newArrayList(chunk.getEntities()).iterator(), key);
+        Entity searched = null;
+        for (World world : Bukkit.getServer().getWorlds()) {
+            searched = iterateForUUID((Iterator<Entity>) world.getEntitiesByClass(entityClass).iterator(), key);
+            if (searched != null) {
+                break;
+            }
+        }
+        if (searched != null) {
+            entityCache.put(key, searched);
+        }
+        return (T) searched;
     }
 
     // ===================================

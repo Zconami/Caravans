@@ -31,7 +31,10 @@ public abstract class LinkedRepository<BE extends org.bukkit.entity.Entity, ME e
     public E recreate(DataKey entityData) {
         final String key = entityData.getPath();
         final Chunk chunkFromData = LinkedEntity.getChunkFromData(entityData);
-        final BE bukkitEntity = EntityUtils.findBy(key, chunkFromData);
+        if (!chunkFromData.isLoaded()) {
+            chunkFromData.load(true);
+        }
+        final BE bukkitEntity = EntityUtils.findBy(key, getBukkitEntityType());
         if (bukkitEntity == null) {
             getLogger().info("Failed to find bukkitEntity for [" + getEntityName() + ":" + key + "], chunk "
                     + (chunkFromData.isLoaded() ? "is (world probably isn't)" : "is NOT")

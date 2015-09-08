@@ -34,6 +34,12 @@ public class BeneficiaryRepository extends Repository<Beneficiary> {
     }
 
     public Beneficiary findByName(String name) {
+        final Beneficiary cached = nameLookup.get(name.toLowerCase());
+        if (cached != null) {
+            return cached;
+        }
+        // FIXME This is so shit
+        all();
         return nameLookup.get(name.toLowerCase());
     }
 

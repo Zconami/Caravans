@@ -51,7 +51,10 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
 
     public BE getBukkitEntity() {
         if (!bukkitEntity.isValid()) {
-            final BE foundEntity = (BE) EntityUtils.findBy(getKey(), chunk);
+            if (!chunk.isLoaded()) {
+                chunk.load(true);
+            }
+            final BE foundEntity = (BE) EntityUtils.findBy(getKey(), getBukkitEntityType());
             if (foundEntity != null) {
                 this.bukkitEntity = foundEntity;
             } else {
