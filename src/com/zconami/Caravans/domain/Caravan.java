@@ -208,13 +208,12 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
             final boolean announceStart = plugin.getConfig().getBoolean("broadcasts.announceStart");
             final int announceLocationDelay = plugin.getConfig().getInt("broadcasts.announceLocationDelay");
             if (announceStart) {
-                final Horse horse = this.getBukkitEntity();
-                final Location location = horse.getLocation();
                 final String beneficiaryName = this.getBeneficiary().getName();
                 StringBuilder announcementBuilder = new StringBuilder(
                         String.format("A trade caravan with an investment of §a%s§f has started for %s",
                                 Util.format(this.getInvestment()), beneficiaryName));
                 if (announceLocationDelay <= 0) {
+                    final Location location = getBukkitEntity().getLocation();
                     announcementBuilder.append(String.format(" @ %d,%d!", location.getBlockX(), location.getBlockZ()));
                     ScoreboardUtils.setUpScoreboardCaravanTask(this);
                     locationIsPublic();
@@ -224,6 +223,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                         @Override
                         public void run() {
                             if (getBukkitEntity().isValid()) {
+                                final Location location = getBukkitEntity().getLocation();
                                 plugin.getServer()
                                         .broadcastMessage(String.format("The location of %s's caravan is %d,%d",
                                                 beneficiaryName, location.getBlockX(), location.getBlockZ()));
