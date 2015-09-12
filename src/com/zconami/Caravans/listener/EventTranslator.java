@@ -64,14 +64,19 @@ public class EventTranslator implements Listener {
 
     @EventHandler
     public void onSignChange(SignChangeEvent event) {
+        final Player player = event.getPlayer();
         final List<Matcher> matchers = regionSignMatchers(event.getLines());
         if (matchers.stream().allMatch(Matcher::find)) {
-            final Block signBlock = event.getBlock();
-            final RegionPreCreateEvent regionCreateEvent = new RegionPreCreateEvent(signBlock, matchers);
-            Bukkit.getServer().getPluginManager().callEvent(regionCreateEvent);
+            if (player.hasPermission("caravans.region")) {
+                final Block signBlock = event.getBlock();
+                final RegionPreCreateEvent regionCreateEvent = new RegionPreCreateEvent(signBlock, matchers);
+                Bukkit.getServer().getPluginManager().callEvent(regionCreateEvent);
 
-            event.setLine(0, ChatColor.GREEN + "[Caravans]");
-            event.setLine(1, regionCreateEvent.getName());
+                event.setLine(0, ChatColor.GREEN + "[Caravans]");
+                event.setLine(1, regionCreateEvent.getName());
+            } else {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -91,14 +96,19 @@ public class EventTranslator implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+        final Player player = event.getPlayer();
         final Block block = event.getBlock();
         if (isSignBlock(block)) {
             final Sign sign = (Sign) block.getState();
             final List<Matcher> matchers = regionSignMatchers(sign.getLines());
             if (matchers.stream().allMatch(Matcher::find)) {
-                final String name = matchers.get(1).group("regionName");
-                final RegionDestroyEvent regionDestroyEvent = new RegionDestroyEvent(name);
-                Bukkit.getServer().getPluginManager().callEvent(regionDestroyEvent);
+                if (player.hasPermission("caravans.region")) {
+                    final String name = matchers.get(1).group("regionName");
+                    final RegionDestroyEvent regionDestroyEvent = new RegionDestroyEvent(name);
+                    Bukkit.getServer().getPluginManager().callEvent(regionDestroyEvent);
+                } else {
+                    event.setCancelled(true);
+                }
             }
         }
     }

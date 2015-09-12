@@ -54,7 +54,7 @@ public class PlayerEventListener implements Listener {
                     }
                 }
             }
-        }, Utils.ticks(3));
+        }, Utils.ticksFromSeconds(3));
     }
 
     @EventHandler

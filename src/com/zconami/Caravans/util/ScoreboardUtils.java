@@ -31,7 +31,7 @@ public class ScoreboardUtils {
     private static final Map<String, Integer> KEY_TASKS = Maps.newHashMap();
     private static final Map<String, Map<Rel, Scoreboard>> KEY_REL_SCOREBOARD = Maps.newHashMap();
 
-    private static final int UPDATE_INTERVAL_TICKS = Utils.ticks(5);
+    private static final int UPDATE_INTERVAL_TICKS = Utils.ticksFromSeconds(5);
 
     // ===================================
     // CONSTRUCTORS

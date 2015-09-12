@@ -2,7 +2,9 @@ package com.zconami.Caravans.util;
 
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 import com.google.common.collect.Maps;
@@ -74,14 +76,24 @@ public class EntityUtils {
         if (radius < EXPANDED_CHUNK_SEARCH_MAX_RADIUS) {
             return searchChunk(key, originChunk, radius + 1);
         }
+
+        // Fallback to checking all worlds' loaded chunks
+        for (World world : Bukkit.getServer().getWorlds()) {
+            for (Entity candidate : world.getEntities()) {
+                if (candidate.getUniqueId().toString().equals(key)) {
+                    return candidate;
+                }
+            }
+        }
+
         return null;
     }
 
     private static Entity checkChunk(String key, Chunk chunk) {
         chunk.load(true);
-        for (Entity entity : chunk.getEntities()) {
-            if (entity.getUniqueId().toString().equals(key)) {
-                return entity;
+        for (Entity candidate : chunk.getEntities()) {
+            if (candidate.getUniqueId().toString().equals(key)) {
+                return candidate;
             }
         }
         return null;

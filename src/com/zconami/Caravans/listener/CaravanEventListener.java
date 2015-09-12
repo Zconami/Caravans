@@ -188,6 +188,8 @@ public class CaravanEventListener implements Listener {
         final Horse horse = caravan.getBukkitEntity();
         final Entity passenger = horse.getPassenger();
         final Location teleportLocation = caravan.getOrigin().getCenter();
+        teleportLocation.setPitch(horse.getLocation().getPitch());
+        teleportLocation.setYaw(horse.getLocation().getYaw());
         horse.eject();
         horse.teleport(teleportLocation);
         if (passenger != null) {

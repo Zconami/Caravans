@@ -231,7 +231,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                                 locationIsPublic();
                             }
                         }
-                    }, Utils.ticks(announceLocationDelay));
+                    }, Utils.ticksFromSeconds(announceLocationDelay));
                 }
                 Bukkit.getServer().broadcastMessage(announcementBuilder.toString());
             }

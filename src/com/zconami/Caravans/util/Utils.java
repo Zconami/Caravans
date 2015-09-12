@@ -27,7 +27,7 @@ public class Utils {
     // PUBLIC METHODS
     // ===================================
 
-    public static int ticks(int seconds) {
+    public static int ticksFromSeconds(int seconds) {
         return seconds * TICKS_PER_SECOND;
     }
 

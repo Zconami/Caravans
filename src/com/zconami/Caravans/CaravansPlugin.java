@@ -3,6 +3,7 @@ package com.zconami.Caravans;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.listener.CaravanEventListener;
 import com.zconami.Caravans.listener.ChunkEventListener;
 import com.zconami.Caravans.listener.EventTranslator;
@@ -93,9 +94,12 @@ public class CaravansPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("=== DISABLE START ===");
+        getLogger().info("Setting logged off passenger flag for caravans currently mounted...");
+        caravanRepository.all().stream().filter(caravan -> caravan.getBukkitEntity().getPassenger() != null)
+                .forEach(Caravan::passengerLoggedOut);
         getLogger().info("Setting location public for limbo caravans...");
         caravanRepository.all().stream().filter(caravan -> caravan.isCaravanStarted() && !caravan.isLocationPublic())
-                .forEach(caravan -> caravan.locationIsPublic());
+                .forEach(Caravan::locationIsPublic);
         getLogger().info("Stopping all scoreboards...");
         ScoreboardUtils.stopAll();
         getLogger().info("Unloading repositories...");
