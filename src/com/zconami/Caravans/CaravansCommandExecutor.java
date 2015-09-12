@@ -88,8 +88,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
                     currentPage = caravans.subList(pageStart, pageStart + PAGE_SIZE);
                 }
 
-                for (Caravan caravan : currentPage.stream()
-                        .filter(caravan -> caravan.isCaravanStarted() && caravan.isLocationPublic())
+                for (Caravan caravan : currentPage.stream().filter(Caravan::locationBroadcasted)
                         .collect(Collectors.toList())) {
                     final StringBuilder builder = new StringBuilder();
                     builder.append(" " + ChatColor.WHITE + caravan.getBeneficiary().getName() + " (");

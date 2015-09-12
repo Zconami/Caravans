@@ -8,5 +8,14 @@ commands:
   c:
     description: Use the help pages to find a command
     usage: /<command> help
-    permission: <plugin name>.c
-    permission-message: You do not have <permission>
+    permission: caravans.list
+    permission-message: You do not have permission to list or track caravans
+permissions:
+  caravans.list:
+    description: Allows players to list and track location of active caravans
+  caravans.region:
+    description: Allows the creation and destruction of trade regions
+    default: op
+  caravans.start:
+    description: Allows players to start a trade caravan
+    default: true

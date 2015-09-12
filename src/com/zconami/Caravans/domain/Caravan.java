@@ -258,6 +258,18 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.setDirty(true);
     }
 
+    public boolean locationAwaitingBroadcast() {
+        return this.isCaravanStarted() && !this.isLocationPublic();
+    }
+
+    public boolean locationBroadcasted() {
+        return this.isCaravanStarted() && this.isLocationPublic();
+    }
+
+    public boolean hasPassenger() {
+        return this.getBukkitEntity().getPassenger() != null;
+    }
+
     // ===================================
     // IMPLEMENTATION OF Entity
     // ===================================
