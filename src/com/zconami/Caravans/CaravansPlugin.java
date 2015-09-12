@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.zconami.Caravans.listener.CaravanEventListener;
 import com.zconami.Caravans.listener.ChunkEventListener;
 import com.zconami.Caravans.listener.EventTranslator;
+import com.zconami.Caravans.listener.PlayerEventListener;
 import com.zconami.Caravans.listener.RegionEventListener;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
@@ -29,6 +30,7 @@ public class CaravansPlugin extends JavaPlugin {
     private final ChunkEventListener chunkEventListner;
     private final CaravanEventListener caravanEventListener;
     private final RegionEventListener regionEventListener;
+    private final PlayerEventListener playerEventListener;
 
     private final RegionRepository regionRepository;
     private final BeneficiaryRepository beneficiaryRepository;
@@ -50,6 +52,7 @@ public class CaravansPlugin extends JavaPlugin {
         this.chunkEventListner = new ChunkEventListener(caravanRepository);
         this.caravanEventListener = new CaravanEventListener(caravanRepository, regionRepository);
         this.regionEventListener = new RegionEventListener(caravanRepository, beneficiaryRepository, regionRepository);
+        this.playerEventListener = new PlayerEventListener(caravanRepository);
     }
 
     // ===================================
@@ -83,6 +86,7 @@ public class CaravansPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(chunkEventListner, this);
         getServer().getPluginManager().registerEvents(caravanEventListener, this);
         getServer().getPluginManager().registerEvents(regionEventListener, this);
+        getServer().getPluginManager().registerEvents(playerEventListener, this);
         getLogger().info("=== ENABLE COMPLETE ===");
     }
 
@@ -103,6 +107,7 @@ public class CaravansPlugin extends JavaPlugin {
         HandlerList.unregisterAll(chunkEventListner);
         HandlerList.unregisterAll(caravanEventListener);
         HandlerList.unregisterAll(regionEventListener);
+        HandlerList.unregisterAll(playerEventListener);
         getLogger().info("=== DISABLE COMPLETE ===");
     }
 

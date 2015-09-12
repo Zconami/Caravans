@@ -67,4 +67,9 @@ public class BeneficiaryRepository extends Repository<Beneficiary> {
         nameLookup.remove(beneficiary.getName().toLowerCase());
     }
 
+    @Override
+    protected boolean shouldRecreate(DataKey entityData) {
+        return true;
+    }
+
 }

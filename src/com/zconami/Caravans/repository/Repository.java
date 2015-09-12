@@ -43,6 +43,10 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
     // PROTECTED METHODS
     // ===================================
 
+    public void save() {
+        storage.save();
+    }
+
     protected E save(E entity) {
         final String key = entity.getKey();
         final DataKey entityData = root.getRelative(key);
@@ -73,6 +77,10 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
                 // Not in cache, but exists in storage, just hasn't been loaded
                 // yet
                 final DataKey entityData = root.getRelative(key);
+
+                if (!shouldRecreate(entityData)) {
+                    return null;
+                }
 
                 entity = recreate(entityData);
                 if (entity == null) {
@@ -105,6 +113,18 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
     public void unload() {
         loaded.values().forEach(this::removeLookups);
         loaded.clear();
+    }
+
+    public void unload(E entity) {
+        removeLookups(entity);
+        loaded.remove(entity.getKey());
+    }
+
+    public DataKey getDataForKey(String key) {
+        if (root.keyExists(key)) {
+            return root.getRelative(key);
+        }
+        return null;
     }
 
     // ===================================
@@ -140,6 +160,8 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
     // ===================================
     // ABSTRACT METHODS
     // ===================================
+
+    protected abstract boolean shouldRecreate(DataKey entityData);
 
     protected abstract E recreate(DataKey entityData);
 

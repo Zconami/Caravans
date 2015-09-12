@@ -77,7 +77,7 @@ public class ScoreboardUtils {
     }
 
     public static void stopScoreboard(Caravan caravan) {
-        cancelScrboardUpdateTask(caravan);
+        cancelScoreboardUpdateTask(caravan);
 
         final Map<Rel, Scoreboard> relScoreboard = KEY_REL_SCOREBOARD.get(caravan.getKey());
         if (relScoreboard != null) {
@@ -101,7 +101,7 @@ public class ScoreboardUtils {
         if (!KEY_REL_SCOREBOARD.containsKey(caravan.getKey())) {
             // If scoreboard isn't setup (perhaps reload or restart), cleanup
             // and recreate
-            cancelScrboardUpdateTask(caravan);
+            cancelScoreboardUpdateTask(caravan);
             setUpScoreboardCaravanTask(caravan);
         }
 
@@ -130,7 +130,7 @@ public class ScoreboardUtils {
         }
     }
 
-    private static void cancelScrboardUpdateTask(Caravan caravan) {
+    private static void cancelScoreboardUpdateTask(Caravan caravan) {
         final Integer entityTaskId = KEY_TASKS.get(caravan.getKey());
         cancelTask(entityTaskId);
     }

@@ -37,7 +37,7 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
         super(bukkitEntity.getUniqueId().toString(), dataKey);
         this.bukkitEntity = bukkitEntity;
         this.minecraftEntity = (ME) NMSUtils.getMinecraftEntity(bukkitEntity);
-        this.chunk = bukkitEntity.getLocation().getChunk();
+        setChunk(bukkitEntity.getLocation().getChunk());
     }
 
     public LinkedEntity(LinkedEntityCreateParameters<BE, ME> params) {
@@ -51,10 +51,7 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
 
     public BE getBukkitEntity() {
         if (!bukkitEntity.isValid()) {
-            if (!chunk.isLoaded()) {
-                chunk.load(true);
-            }
-            final BE foundEntity = (BE) EntityUtils.findBy(getKey(), getBukkitEntityType());
+            final BE foundEntity = (BE) EntityUtils.findBy(getKey(), chunk);
             if (foundEntity != null) {
                 this.bukkitEntity = foundEntity;
             } else {
@@ -73,7 +70,7 @@ public abstract class LinkedEntity<BE extends org.bukkit.entity.Entity, ME exten
     }
 
     public void setChunk(Chunk chunk) {
-        if (!this.chunk.equals(chunk)) {
+        if (!chunk.equals(this.chunk)) {
             this.chunk = chunk;
             this.setDirty(true);
         }

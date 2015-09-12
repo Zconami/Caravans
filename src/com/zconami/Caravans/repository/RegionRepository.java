@@ -67,4 +67,9 @@ public class RegionRepository extends Repository<Region> {
         nameLookup.remove(region.getName());
     }
 
+    @Override
+    protected boolean shouldRecreate(DataKey entityData) {
+        return true;
+    }
+
 }

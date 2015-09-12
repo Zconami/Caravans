@@ -108,4 +108,9 @@ public class CaravanRepository extends LinkedRepository<Horse, EntityHorse, Cara
         }
     }
 
+    @Override
+    protected boolean shouldRecreate(DataKey entityData) {
+        return !entityData.getBoolean(Caravan.PASSENGER_LOGGED_OUT);
+    }
+
 }
