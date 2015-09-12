@@ -84,8 +84,7 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
 
                 entity = recreate(entityData);
                 if (entity == null) {
-                    getLogger().log(Level.FINE,
-                            "Failed to load bukkit entity for " + key + ", likely in unloaded chunk since restart");
+                    getLogger().log(Level.FINE, "Failed to load bukkit entity for " + key);
                     return null;
                 }
                 loaded.put(key, entity);
