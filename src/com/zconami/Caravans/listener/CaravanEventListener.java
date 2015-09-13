@@ -1,6 +1,6 @@
 package com.zconami.Caravans.listener;
 
-import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+import static com.zconami.Caravans.util.Utils.getCaravansConfig;
 import static com.zconami.Caravans.util.Utils.getLogger;
 
 import java.util.List;
@@ -113,8 +113,7 @@ public class CaravanEventListener implements Listener {
 
                         beneficiary.successfulCaravan();
 
-                        final boolean announceSuccess = getCaravansPlugin().getConfig()
-                                .getBoolean("broadcasts.announceSuccess");
+                        final boolean announceSuccess = getCaravansConfig().getBoolean("broadcasts.announceSuccess");
                         if (announceSuccess) {
                             final String announcement = String.format(
                                     "A trade caravan with an investment of §a%s§f completed successfully by %s returning §a%s§f!",
@@ -141,7 +140,7 @@ public class CaravanEventListener implements Listener {
 
     @EventHandler
     public void onCaravanDestroy(CaravanDestroyEvent event) {
-        final boolean announceDestroy = getCaravansPlugin().getConfig().getBoolean("broadcasts.announceDestory");
+        final boolean announceDestroy = getCaravansConfig().getBoolean("broadcasts.announceDestory");
         if (announceDestroy) {
             final Caravan caravan = event.getCaravan();
             final String beneficiaryName = caravan.getBeneficiary().getName();

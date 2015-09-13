@@ -1,6 +1,6 @@
 package com.zconami.Caravans.listener;
 
-import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+import static com.zconami.Caravans.util.Utils.getCaravansConfig;
 
 import java.util.UUID;
 
@@ -93,7 +93,7 @@ public class RegionEventListener implements Listener {
             return;
         }
 
-        final int cooldownSeconds = getCaravansPlugin().getConfig().getInt("caravans.cooldownAfterSuccess");
+        final int cooldownSeconds = getCaravansConfig().getInt("caravans.cooldownAfterSuccess");
         final long cooldownFinishedMillis = beneficiary.getLastSuccessfulCaravan() + cooldownSeconds * 1000;
         if (System.currentTimeMillis() < cooldownFinishedMillis) {
             final java.util.Date cooldownFinisihedDate = new java.util.Date(cooldownFinishedMillis);
@@ -102,7 +102,7 @@ public class RegionEventListener implements Listener {
             return;
         }
 
-        final boolean onePerFaction = getCaravansPlugin().getConfig().getBoolean("caravans.oneActivePerFaction");
+        final boolean onePerFaction = getCaravansConfig().getBoolean("caravans.oneActivePerFaction");
         if (onePerFaction) {
             if (playerFaction.getId().equals(Factions.ID_NONE)) {
                 event.getPlayer().sendMessage("You must be in a faction to have a caravan!");

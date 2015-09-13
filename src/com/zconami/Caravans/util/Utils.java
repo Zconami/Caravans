@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import com.zconami.Caravans.CaravansPlugin;
 
@@ -37,6 +38,10 @@ public class Utils {
 
     public static boolean isSignBlock(Block block) {
         return block.getState() instanceof Sign;
+    }
+
+    public static FileConfiguration getCaravansConfig() {
+        return getCaravansPlugin().getConfig();
     }
 
     public static CaravansPlugin getCaravansPlugin() {

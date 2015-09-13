@@ -1,10 +1,9 @@
 caravans:
     oneActivePerFaction: true
     cooldownAfterSuccess: 10800 # In seconds
-    profitMultiplyer: # (Distance to objective / blockDivisor) * reward
-        blockDivisor: 10
-        PvEReward: 0.001
-        PvPReward: 0.01
+    profitMultiplyer: # Return = Investment ^ (1 + (distance * reward))
+        PvEReward: 0.000035
+        PvPReward: 0.0001
 broadcasts:
     announceStart: true
     announceLocationDelay: 300 # In seconds, leave as 0 if location should be announced with start, if announce start is false the location won't be broadcast either

@@ -1,5 +1,6 @@
 package com.zconami.Caravans.domain;
 
+import static com.zconami.Caravans.util.Utils.getCaravansConfig;
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 import static com.zconami.Caravans.util.Utils.getLogger;
 
@@ -41,22 +42,21 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         PvE {
             @Override
             protected double calculate(Region origin, Region destination) {
-                final double reward = getCaravansPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvEReward");
-                return distanceOverBlockDivisorByReward(origin, destination, reward);
+                final double reward = getCaravansConfig().getDouble("caravans.profitMultiplyer.PvEReward");
+                return distanceByReward(origin, destination, reward);
             }
         },
         PvP {
             @Override
             protected double calculate(Region origin, Region destination) {
-                final double reward = getCaravansPlugin().getConfig().getDouble("caravans.profitMultiplyer.PvPReward");
-                return distanceOverBlockDivisorByReward(origin, destination, reward);
+                final double reward = getCaravansConfig().getDouble("caravans.profitMultiplyer.PvPReward");
+                return distanceByReward(origin, destination, reward);
             }
         };
 
-        private static double distanceOverBlockDivisorByReward(Region origin, Region destination, double reward) {
-            final int blockDivisor = getCaravansPlugin().getConfig().getInt("caravans.profitMultiplyer.blockDivisor");
+        private static double distanceByReward(Region origin, Region destination, double reward) {
             final double distance = destination.getCenter().distance(origin.getCenter());
-            return 1.0 + (Math.max(distance / blockDivisor, 1) * reward);
+            return 1.0 + (distance * reward);
         }
 
         protected abstract double calculate(Region origin, Region destination);
@@ -184,7 +184,9 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     }
 
     public long getReturn(Region destination) {
-        return getInvestment() + (long) Math.floor(this.profitStrategy.calculate(origin, destination));
+        final double calculatedMultiplyer = getProfitStrategy().calculate(getOrigin(), destination);
+        final double calculatedReturn = Math.pow(getInvestment(), calculatedMultiplyer);
+        return (long) Math.floor(calculatedReturn);
     }
 
     public Region getOrigin() {
@@ -205,8 +207,8 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
             this.setDirty(true);
 
             final CaravansPlugin plugin = getCaravansPlugin();
-            final boolean announceStart = plugin.getConfig().getBoolean("broadcasts.announceStart");
-            final int announceLocationDelay = plugin.getConfig().getInt("broadcasts.announceLocationDelay");
+            final boolean announceStart = getCaravansConfig().getBoolean("broadcasts.announceStart");
+            final int announceLocationDelay = getCaravansConfig().getInt("broadcasts.announceLocationDelay");
             if (announceStart) {
                 final String beneficiaryName = this.getBeneficiary().getName();
                 StringBuilder announcementBuilder = new StringBuilder(
