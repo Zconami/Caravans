@@ -6,6 +6,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scoreboard.ScoreboardManager;
+import org.gestern.gringotts.Configuration;
 
 import com.zconami.Caravans.CaravansPlugin;
 
@@ -38,6 +41,18 @@ public class Utils {
 
     public static boolean isSignBlock(Block block) {
         return block.getState() instanceof Sign;
+    }
+
+    public static String getGringottsNamePlural() {
+        return Configuration.CONF.currency.namePlural;
+    }
+
+    public static BukkitScheduler getScheduler() {
+        return Bukkit.getScheduler();
+    }
+
+    public static ScoreboardManager getScoreboardManager() {
+        return Bukkit.getScoreboardManager();
     }
 
     public static FileConfiguration getCaravansConfig() {

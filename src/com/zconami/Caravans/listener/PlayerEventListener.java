@@ -1,8 +1,8 @@
 package com.zconami.Caravans.listener;
 
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+import static com.zconami.Caravans.util.Utils.getScheduler;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
@@ -41,7 +41,7 @@ public class PlayerEventListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         // Have to run later for player to have attributes set properly
-        Bukkit.getScheduler().runTaskLater(getCaravansPlugin(), new Runnable() {
+        getScheduler().runTaskLater(getCaravansPlugin(), new Runnable() {
             @Override
             public void run() {
                 final Player player = event.getPlayer();

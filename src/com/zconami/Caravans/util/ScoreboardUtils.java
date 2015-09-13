@@ -1,11 +1,13 @@
 package com.zconami.Caravans.util;
 
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+import static com.zconami.Caravans.util.Utils.getGringottsNamePlural;
+import static com.zconami.Caravans.util.Utils.getScheduler;
+import static com.zconami.Caravans.util.Utils.getScoreboardManager;
 
 import java.util.Collection;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
@@ -14,7 +16,6 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
-import org.gestern.gringotts.Configuration;
 
 import com.google.common.collect.Maps;
 import com.massivecraft.factions.Rel;
@@ -23,6 +24,13 @@ import com.massivecraft.factions.util.RelationUtil;
 import com.zconami.Caravans.domain.Caravan;
 
 public class ScoreboardUtils {
+
+    // ===================================
+    // CONSTRUCTORS
+    // ===================================
+
+    public static final int DISPLAY_NAME_MAX_LENGTH = 32;
+    private static final int DISPLAY_NAME_FACTION_FORMATTING_LENGTH_MIN = 11;
 
     // ===================================
     // ATTRIBUTES
@@ -51,7 +59,7 @@ public class ScoreboardUtils {
             relScoreboard.put(rel, scoreboardWithRelation(caravan, rel));
         }
 
-        final BukkitScheduler scheduler = Bukkit.getScheduler();
+        final BukkitScheduler scheduler = getScheduler();
         final Integer taskId = Integer.valueOf(scheduler.scheduleSyncRepeatingTask(getCaravansPlugin(), new Runnable() {
             @Override
             public void run() {
@@ -95,7 +103,7 @@ public class ScoreboardUtils {
         relMaps.forEach(map -> map.values().forEach(ScoreboardUtils::unregisterObjective));
     }
 
-    public static void showScoreboard(Player player, Caravan caravan) {
+    public static Scoreboard showScoreboard(Player player, Caravan caravan) {
         final Rel relation = RelationUtil.getRelationOfThatToMe(caravan.getFaction(), MPlayer.get(player));
 
         if (!KEY_REL_SCOREBOARD.containsKey(caravan.getKey())) {
@@ -107,6 +115,8 @@ public class ScoreboardUtils {
 
         final Scoreboard scoreboard = KEY_REL_SCOREBOARD.get(caravan.getKey()).get(relation);
         player.setScoreboard(scoreboard);
+
+        return scoreboard;
     }
 
     // ===================================
@@ -114,20 +124,29 @@ public class ScoreboardUtils {
     // ===================================
 
     private static String getName(Caravan caravan, Rel relation) {
+
         final String beneficiaryName = caravan.getBeneficiary().getName();
-        final String factionName = relation.getColor() + caravan.getFaction().getName();
-        if (beneficiaryName.length() > 30) {
-            return beneficiaryName.substring(0, 27) + "...";
-        } else if (beneficiaryName.length() + factionName.length() + 3 > 30) {
-            if (factionName.length() < 3) {
-                return beneficiaryName;
+        final String factionName = caravan.getFaction().getName();
+
+        if (DISPLAY_NAME_MAX_LENGTH - DISPLAY_NAME_FACTION_FORMATTING_LENGTH_MIN < beneficiaryName.length()) {
+            if (beneficiaryName.length() > DISPLAY_NAME_MAX_LENGTH) {
+                return beneficiaryName.substring(0, DISPLAY_NAME_MAX_LENGTH - 3) + "...";
             } else {
-                final String trimmedFactionName = factionName.substring(0, 30 - beneficiaryName.length() - 6) + "...";
-                return beneficiaryName + " (" + trimmedFactionName + "§f)";
+                return beneficiaryName;
             }
-        } else {
-            return beneficiaryName + " (" + factionName + "§f)";
         }
+
+        final boolean factionNeedsTrimmed = beneficiaryName.length() + (DISPLAY_NAME_FACTION_FORMATTING_LENGTH_MIN - 4)
+                + factionName.length() >= DISPLAY_NAME_MAX_LENGTH;
+        if (factionNeedsTrimmed) {
+            final int spaceRemaining = DISPLAY_NAME_MAX_LENGTH - DISPLAY_NAME_FACTION_FORMATTING_LENGTH_MIN
+                    - beneficiaryName.length() + 1;
+            final String trimmedFactionName = factionName.substring(0, spaceRemaining);
+            return beneficiaryName + " (" + relation.getColor() + trimmedFactionName + "...§f)";
+        } else {
+            return beneficiaryName + " (" + relation.getColor() + factionName + "§f)";
+        }
+
     }
 
     private static void cancelScoreboardUpdateTask(Caravan caravan) {
@@ -137,7 +156,7 @@ public class ScoreboardUtils {
 
     private static void cancelTask(Integer taskId) {
         if (taskId != null) {
-            final BukkitScheduler scheduler = Bukkit.getScheduler();
+            final BukkitScheduler scheduler = getScheduler();
             scheduler.cancelTask(taskId.intValue());
         }
     }
@@ -147,7 +166,7 @@ public class ScoreboardUtils {
     }
 
     private static Scoreboard scoreboardWithRelation(Caravan caravan, Rel relation) {
-        final Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        final Scoreboard scoreboard = getScoreboardManager().getNewScoreboard();
 
         final String objectiveKey = getKey(caravan);
 
@@ -155,7 +174,7 @@ public class ScoreboardUtils {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(getName(caravan, relation));
 
-        final Score scoreValue = objective.getScore("§a" + Configuration.CONF.currency.namePlural + "§f");
+        final Score scoreValue = objective.getScore("§a" + getGringottsNamePlural() + "§f");
         scoreValue.setScore((int) caravan.getInvestment());
 
         return scoreboard;

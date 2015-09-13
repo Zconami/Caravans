@@ -2,6 +2,7 @@ package com.zconami.Caravans.listener;
 
 import static com.zconami.Caravans.util.Utils.getCaravansConfig;
 import static com.zconami.Caravans.util.Utils.getLogger;
+import static com.zconami.Caravans.util.Utils.getGringottsNamePlural;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +16,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.InventoryHolder;
-import org.gestern.gringotts.Configuration;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.Util;
@@ -67,8 +67,8 @@ public class CaravanEventListener implements Listener {
         final Caravan caravan = event.getCaravan();
         final Horse horse = caravan.getBukkitEntity();
         if (caravan.getInvestment() <= 0) {
-            event.getPlayer().sendMessage("You must invest some §a" + Configuration.CONF.currency.namePlural
-                    + "§f before starting a trade caravan!");
+            event.getPlayer().sendMessage(
+                    "You must invest some §a" + getGringottsNamePlural() + "§f before starting a trade caravan!");
             horse.eject();
         } else {
             if (!caravan.isCaravanStarted()) {

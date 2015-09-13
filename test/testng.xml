@@ -2,6 +2,7 @@
     <test name="tests">
         <classes>
             <class name="com.zconami.Caravans.domain.ProfitMultiplyerStrategyTests"/>
+            <class name="com.zconami.Caravans.util.ScoreboardUtilsTests"/>
         </classes>
     </test>
 </suite>
