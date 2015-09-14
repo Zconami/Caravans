@@ -3,6 +3,7 @@ package com.zconami.Caravans.domain;
 import static com.zconami.Caravans.util.Utils.getCaravansConfig;
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 import static com.zconami.Caravans.util.Utils.getLogger;
+import static com.zconami.Caravans.util.Utils.getOnlinePlayers;
 
 import java.util.Set;
 import java.util.UUID;
@@ -157,7 +158,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         final ProfitMultiplyerStrategy profitStrategy;
 
         final Set<Faction> onlineFactions = Sets.newHashSet();
-        for (Faction faction : Bukkit.getOnlinePlayers().stream().map(player -> MPlayer.get(player).getFaction())
+        for (Faction faction : getOnlinePlayers().stream().map(player -> MPlayer.get(player).getFaction())
                 .collect(Collectors.toList())) {
             if (!faction.getId().equals(Factions.ID_NONE) && !faction.getId().equals(Factions.ID_SAFEZONE)
                     && !faction.getId().equals(Factions.ID_WARZONE)) {

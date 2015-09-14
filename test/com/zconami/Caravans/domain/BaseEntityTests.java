@@ -1,5 +1,7 @@
 package com.zconami.Caravans.domain;
 
-public abstract class BaseEntityTests {
+import org.powermock.modules.testng.PowerMockTestCase;
+
+public abstract class BaseEntityTests extends PowerMockTestCase {
 
 }

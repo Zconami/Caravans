@@ -1,11 +1,13 @@
 package com.zconami.Caravans.util;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.gestern.gringotts.Configuration;
@@ -49,6 +51,10 @@ public class Utils {
 
     public static BukkitScheduler getScheduler() {
         return Bukkit.getScheduler();
+    }
+
+    public static Collection<? extends Player> getOnlinePlayers() {
+        return Bukkit.getOnlinePlayers();
     }
 
     public static ScoreboardManager getScoreboardManager() {
