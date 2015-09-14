@@ -1,6 +1,5 @@
 package com.zconami.Caravans.listener;
 
-import static com.zconami.Caravans.util.Utils.getLogger;
 import static com.zconami.Caravans.util.Utils.isSignBlock;
 
 import java.util.List;
@@ -154,9 +153,6 @@ public class EventTranslator implements Listener {
             final String line = ChatColor.stripColor(lines[i]);
             final Pattern validator = signValidators[i];
             final Matcher matcher = validator.matcher(line);
-            if (!matcher.find()) {
-                getLogger().info("Failed to find on: \"" + line + "\" with \"" + validator + "\"");
-            }
             matcher.reset();
             matchers.add(matcher);
         }

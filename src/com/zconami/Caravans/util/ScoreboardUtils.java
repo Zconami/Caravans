@@ -30,6 +30,8 @@ public class ScoreboardUtils {
     // ===================================
 
     public static final int DISPLAY_NAME_MAX_LENGTH = 32;
+
+    // Includes 1st letter of faction name: <playerName> ($xF...$f)
     private static final int DISPLAY_NAME_FACTION_FORMATTING_LENGTH_MIN = 11;
 
     // ===================================
