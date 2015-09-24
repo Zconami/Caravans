@@ -139,6 +139,8 @@ public class DynmapUtils {
         if (foundPolyMarker != null) {
             foundPolyMarker.deleteMarker();
         }
+
+        getMarkerSet(caravan).deleteMarkerSet();
     }
 
     private static MarkerIcon getMarkerIcon() {
