@@ -1,8 +1,10 @@
 <suite name="tests" verbose="10" object-factory="org.powermock.modules.testng.PowerMockObjectFactory">
     <test name="tests">
-        <classes>
-            <class name="com.zconami.Caravans.domain.ProfitMultiplyerStrategyTests"/>
-            <class name="com.zconami.Caravans.util.ScoreboardUtilsTests"/>
-        </classes>
+      <packages>
+          <package name="com.zconami.Caravans.domain"/>
+          <package name="com.zconami.Caravans.listener"/>
+          <package name="com.zconami.Caravans.repository"/>
+          <package name="com.zconami.Caravans.util"/>
+      </packages>
     </test>
 </suite>

@@ -1,8 +1,8 @@
 package com.zconami.Caravans.listener;
 
 import static com.zconami.Caravans.util.Utils.getCaravansConfig;
-import static com.zconami.Caravans.util.Utils.getLogger;
 import static com.zconami.Caravans.util.Utils.getGringottsNamePlural;
+import static com.zconami.Caravans.util.Utils.getLogger;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.InventoryHolder;
+import org.dynmap.DynmapAPI;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.Util;
@@ -38,6 +39,7 @@ public class CaravanEventListener implements Listener {
     // ATTRIBUTES
     // ===================================
 
+    private final DynmapAPI dynmap;
     private final CaravanRepository caravanRepository;
     private final RegionRepository regionRepository;
 
@@ -45,7 +47,9 @@ public class CaravanEventListener implements Listener {
     // CONSTRUCTORS
     // ===================================
 
-    public CaravanEventListener(CaravanRepository caravanRepository, RegionRepository regionRepository) {
+    public CaravanEventListener(DynmapAPI dynmap, CaravanRepository caravanRepository,
+            RegionRepository regionRepository) {
+        this.dynmap = dynmap;
         this.caravanRepository = caravanRepository;
         this.regionRepository = regionRepository;
     }

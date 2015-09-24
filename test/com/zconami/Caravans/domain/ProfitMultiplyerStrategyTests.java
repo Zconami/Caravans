@@ -151,6 +151,7 @@ public class ProfitMultiplyerStrategyTests extends PowerMockTestCase {
         when(mockCaravan.getProfitStrategy()).thenReturn(ProfitMultiplyerStrategy.PvE);
         when(mockCaravan.getOrigin()).thenReturn(mockOrigin);
         when(mockCaravan.getReturn(mockDestination)).thenCallRealMethod();
+        when(mockCaravan.getReturn(mockDestinationCenter)).thenCallRealMethod();
 
         final long calculatedReturn = mockCaravan.getReturn(mockDestination);
         assertEquals(expectedReturn, calculatedReturn);

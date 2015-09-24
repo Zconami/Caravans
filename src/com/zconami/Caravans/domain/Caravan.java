@@ -27,6 +27,7 @@ import com.massivecraft.factions.entity.MPlayer;
 import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.exception.CaravanCreateBeneficiaryPlayerOfflineException;
 import com.zconami.Caravans.storage.DataKey;
+import com.zconami.Caravans.util.DynmapUtils;
 import com.zconami.Caravans.util.NMSUtils;
 import com.zconami.Caravans.util.ScoreboardUtils;
 import com.zconami.Caravans.util.Utils;
@@ -42,25 +43,25 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public enum ProfitMultiplyerStrategy {
         PvE {
             @Override
-            protected double calculate(Region origin, Region destination) {
+            protected double calculateExponent(Region origin, Location destination) {
                 final double reward = getCaravansConfig().getDouble("caravans.profitMultiplyer.PvEReward");
                 return distanceByReward(origin, destination, reward);
             }
         },
         PvP {
             @Override
-            protected double calculate(Region origin, Region destination) {
+            protected double calculateExponent(Region origin, Location destination) {
                 final double reward = getCaravansConfig().getDouble("caravans.profitMultiplyer.PvPReward");
                 return distanceByReward(origin, destination, reward);
             }
         };
 
-        private static double distanceByReward(Region origin, Region destination, double reward) {
-            final double distance = destination.getCenter().distance(origin.getCenter());
+        private static double distanceByReward(Region origin, Location destination, double reward) {
+            final double distance = destination.distance(origin.getCenter());
             return 1.0 + (distance * reward);
         }
 
-        protected abstract double calculate(Region origin, Region destination);
+        protected abstract double calculateExponent(Region origin, Location destination);
 
     }
 
@@ -185,8 +186,12 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     }
 
     public long getReturn(Region destination) {
-        final double calculatedMultiplyer = getProfitStrategy().calculate(getOrigin(), destination);
-        final double calculatedReturn = Math.pow(getInvestment(), calculatedMultiplyer);
+        return getReturn(destination.getCenter());
+    }
+
+    public long getReturn(Location destination) {
+        final double calculatedExpoent = getProfitStrategy().calculateExponent(getOrigin(), destination);
+        final double calculatedReturn = Math.pow(getInvestment(), calculatedExpoent);
         return (long) Math.floor(calculatedReturn);
     }
 
@@ -219,6 +224,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                     final Location location = getBukkitEntity().getLocation();
                     announcementBuilder.append(String.format(" @ %d,%d!", location.getBlockX(), location.getBlockZ()));
                     ScoreboardUtils.setUpScoreboardCaravanTask(this);
+                    DynmapUtils.setupDynmapCaravanTask(this);
                     locationIsPublic();
                 } else {
                     announcementBuilder.append("!");
@@ -231,6 +237,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                                         .broadcastMessage(String.format("The location of %s's caravan is %d,%d",
                                                 beneficiaryName, location.getBlockX(), location.getBlockZ()));
                                 ScoreboardUtils.setUpScoreboardCaravanTask(Caravan.this);
+                                DynmapUtils.setupDynmapCaravanTask(Caravan.this);
                                 locationIsPublic();
                             }
                         }
@@ -281,6 +288,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public void remove() {
         super.remove();
         ScoreboardUtils.stopScoreboard(this);
+        DynmapUtils.stopCaravanDynmap(this);
         getBukkitEntity().eject();
         new AccountInventory(this.getBukkitEntity().getInventory()).remove(getInvestment());
         getBukkitEntity().remove();

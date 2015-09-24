@@ -1,6 +1,6 @@
 name: Caravans
 main: com.zconami.Caravans.CaravansPlugin
-depend: [Factions, Gringotts]
+depend: [Factions, Gringotts, dynmap]
 version: 1.0
 authors: [Autonomy]
 website: http://zconami.com/

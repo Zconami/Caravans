@@ -11,6 +11,11 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.dynmap.DynmapAPI;
+import org.dynmap.markers.Marker;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerIcon;
+import org.dynmap.markers.MarkerSet;
 
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
@@ -18,6 +23,7 @@ import com.massivecraft.factions.entity.MPlayer;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.BeneficiaryCreateParameters;
 import com.zconami.Caravans.domain.Caravan;
+import com.zconami.Caravans.domain.EntityObserver;
 import com.zconami.Caravans.domain.Region;
 import com.zconami.Caravans.domain.RegionCreateParameters;
 import com.zconami.Caravans.event.CaravanPostCreateEvent;
@@ -28,12 +34,21 @@ import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
 
-public class RegionEventListener implements Listener {
+public class RegionEventListener implements Listener, EntityObserver<Region> {
+
+    // ===================================
+    // CONSTANTS
+    // ===================================
+
+    private final static String REGION_MARKER_SET_ID = "caravansRegionMarkers";
+    private final static String REGION_MARKER_SET_LABEL = "Trade Posts";
+    private final static String REGION_MARKER_ICON = "coins";
 
     // ===================================
     // ATTRIBUTES
     // ===================================
 
+    private final DynmapAPI dynmap;
     private final CaravanRepository caravanRepository;
     private final BeneficiaryRepository beneficiaryRepository;
     private final RegionRepository regionRepository;
@@ -42,8 +57,9 @@ public class RegionEventListener implements Listener {
     // CONSTRUCTORS
     // ===================================
 
-    public RegionEventListener(CaravanRepository caravanRepository, BeneficiaryRepository beneficiaryRepository,
-            RegionRepository regionRepository) {
+    public RegionEventListener(DynmapAPI dynmap, CaravanRepository caravanRepository,
+            BeneficiaryRepository beneficiaryRepository, RegionRepository regionRepository) {
+        this.dynmap = dynmap;
         this.caravanRepository = caravanRepository;
         this.beneficiaryRepository = beneficiaryRepository;
         this.regionRepository = regionRepository;
@@ -64,8 +80,8 @@ public class RegionEventListener implements Listener {
         params.setOrigin(event.getIsOrigin());
         params.setDestination(event.getIsDestination());
 
-        regionRepository.save(Region.create(params));
-
+        final Region savedRegion = regionRepository.save(Region.create(params));
+        createMarker(savedRegion);
     }
 
     @EventHandler
@@ -123,6 +139,7 @@ public class RegionEventListener implements Listener {
     @EventHandler
     public void onRegionDestroy(RegionDestroyEvent event) {
         final Region region = regionRepository.findByName(event.getName());
+        region.addObserver(this);
         if (caravanRepository.activeFrom(region).isEmpty()) {
             region.remove();
         } else {
@@ -131,8 +148,60 @@ public class RegionEventListener implements Listener {
     }
 
     // ===================================
+    // IMPLEMENTATION OF ENTITY OBSERVER
+    // ===================================
+
+    @Override
+    public void entityChanged(Region region) {
+    }
+
+    @Override
+    public void entityRemoved(Region region) {
+        removeMarker(region);
+    }
+
+    // ===================================
     // PRIVATE METHODS
     // ===================================
+
+    private String getMarkerId(Region region) {
+        return region.getKey().replace("-", "");
+    }
+
+    private void createMarker(Region region) {
+        final MarkerSet markerSet = getMarkerSet();
+        final Location regionCenter = region.getCenter();
+
+        final Marker createdMarker = markerSet.createMarker(getMarkerId(region), region.getName(), true,
+                regionCenter.getWorld().getName(), regionCenter.getX(), regionCenter.getY(), regionCenter.getZ(),
+                getMarkerIcon(), true);
+        createdMarker.setDescription("<strong>Exports:</strong> " + (region.isOrigin() ? "Yes" : "No")
+                + "<br/><strong>Imports:</strong> " + (region.isDestination() ? "Yes" : "No"));
+    }
+
+    private void removeMarker(Region region) {
+        final MarkerSet markerSet = getMarkerSet();
+
+        final Marker foundMarker = markerSet.findMarker(getMarkerId(region));
+        if (foundMarker != null) {
+            foundMarker.deleteMarker();
+        }
+    }
+
+    private MarkerIcon getMarkerIcon() {
+        final MarkerAPI markerAPI = dynmap.getMarkerAPI();
+        return markerAPI.getMarkerIcon(REGION_MARKER_ICON);
+    }
+
+    private MarkerSet getMarkerSet() {
+        final MarkerAPI markerAPI = dynmap.getMarkerAPI();
+        final MarkerSet existingMarketSet = markerAPI.getMarkerSet(REGION_MARKER_SET_ID);
+        if (existingMarketSet != null) {
+            return existingMarketSet;
+        } else {
+            return markerAPI.createMarkerSet(REGION_MARKER_SET_ID, REGION_MARKER_SET_LABEL, null, true);
+        }
+    }
 
     private Beneficiary findOrCreate(Player player) {
         final Beneficiary existing = beneficiaryRepository.find(player.getUniqueId().toString());

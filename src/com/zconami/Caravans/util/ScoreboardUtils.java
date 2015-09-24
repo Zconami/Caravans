@@ -26,7 +26,7 @@ import com.zconami.Caravans.domain.Caravan;
 public class ScoreboardUtils {
 
     // ===================================
-    // CONSTRUCTORS
+    // CONSTANTS
     // ===================================
 
     public static final int DISPLAY_NAME_MAX_LENGTH = 32;
@@ -76,6 +76,9 @@ public class ScoreboardUtils {
 
                         final Score scoreZ = objective.getScore("§6Z§f");
                         scoreZ.setScore(location.getBlockZ());
+
+                        final Score estimatedReturn = objective.getScore("Estimated Return");
+                        estimatedReturn.setScore((int) caravan.getReturn(location));
 
                     }
                 }
