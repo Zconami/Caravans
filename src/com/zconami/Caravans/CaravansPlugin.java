@@ -103,8 +103,8 @@ public class CaravansPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         getLogger().info("=== DISABLE START ===");
-        getLogger().info("Setting logged off passenger flag for caravans currently mounted...");
-        caravanRepository.all().stream().filter(Caravan::hasPassenger).forEach(Caravan::passengerLoggedOut);
+        getLogger().info("Unmounting all caravans currently mounted...");
+        caravanRepository.all().stream().filter(Caravan::hasPassenger).forEach(Caravan::dismount);
         getLogger().info("Setting location public for limbo caravans...");
         caravanRepository.all().stream().filter(Caravan::locationAwaitingBroadcast).forEach(Caravan::locationIsPublic);
         getLogger().info("Stopping all scoreboards...");

@@ -120,9 +120,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public static final String LOCATION_PUBLIC = "locationPublic";
     private boolean locationPublic;
 
-    public static final String PASSENGER_LOGGED_OUT = "passengerLoggedOut";
-    private boolean passengerLoggedOut;
-
     private final Faction faction;
 
     // ===================================
@@ -140,7 +137,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.faction = beneficiary.getFaction();
         this.origin = params.getOrigin();
         this.profitStrategy = params.getProfitStrategy();
-        this.passengerLoggedOut = false;
 
         caravanHasStarted();
     }
@@ -264,11 +260,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         return this.profitStrategy;
     }
 
-    public void passengerLoggedOut() {
-        this.passengerLoggedOut = true;
-        this.setDirty(true);
-    }
-
     public boolean locationAwaitingBroadcast() {
         return !this.isLocationPublic();
     }
@@ -279,6 +270,10 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
     public boolean hasPassenger() {
         return this.getBukkitEntity().getPassenger() != null;
+    }
+
+    public void dismount() {
+        this.getBukkitEntity().eject();
     }
 
     // ===================================
@@ -302,7 +297,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         dataKey.setString(ORIGIN, origin.getKey());
         dataKey.setString(PROFIT_STRATEGY, profitStrategy.name());
         dataKey.setBoolean(LOCATION_PUBLIC, locationPublic);
-        dataKey.setBoolean(PASSENGER_LOGGED_OUT, passengerLoggedOut);
     }
 
     @Override
@@ -324,7 +318,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.profitStrategy = ProfitMultiplyerStrategy.valueOf(profitStrategyName);
 
         this.locationPublic = dataKey.getBoolean(LOCATION_PUBLIC);
-        this.passengerLoggedOut = dataKey.getBoolean(PASSENGER_LOGGED_OUT);
     }
 
     // ===================================

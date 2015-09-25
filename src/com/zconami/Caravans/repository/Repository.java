@@ -78,10 +78,6 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
                 // yet
                 final DataKey entityData = root.getRelative(key);
 
-                if (!shouldRecreate(entityData)) {
-                    return null;
-                }
-
                 entity = recreate(entityData);
                 if (entity == null) {
                     getLogger().log(Level.FINE, "Failed to load bukkit entity for " + key);
@@ -159,8 +155,6 @@ public abstract class Repository<E extends Entity> implements EntityObserver<E> 
     // ===================================
     // ABSTRACT METHODS
     // ===================================
-
-    protected abstract boolean shouldRecreate(DataKey entityData);
 
     protected abstract E recreate(DataKey entityData);
 
