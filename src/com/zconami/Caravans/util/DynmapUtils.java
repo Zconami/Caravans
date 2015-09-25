@@ -55,6 +55,10 @@ public class DynmapUtils {
 
     public static void setupDynmapCaravanTask(Caravan caravan) {
 
+        if (isCaravanTaskRunning(caravan)) {
+            return;
+        }
+
         final BukkitScheduler scheduler = getScheduler();
         final Integer taskId = Integer.valueOf(scheduler.scheduleSyncRepeatingTask(getCaravansPlugin(), new Runnable() {
             @Override

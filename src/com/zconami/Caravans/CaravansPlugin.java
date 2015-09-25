@@ -1,5 +1,8 @@
 package com.zconami.Caravans;
 
+import static com.zconami.Caravans.util.Utils.ticksFromSeconds;
+
+import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
@@ -97,6 +100,13 @@ public class CaravansPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(caravanEventListener, this);
         getServer().getPluginManager().registerEvents(regionEventListener, this);
         getServer().getPluginManager().registerEvents(playerEventListener, this);
+        getLogger().info("Scheduling task for creation of dynmap caravan update tasks...");
+        Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+            @Override
+            public void run() {
+                caravanRepository.all().forEach(DynmapUtils::setupDynmapCaravanTask);
+            }
+        }, ticksFromSeconds(180));
         getLogger().info("=== ENABLE COMPLETE ===");
     }
 

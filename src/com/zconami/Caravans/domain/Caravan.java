@@ -10,13 +10,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.gestern.gringotts.AccountInventory;
@@ -28,7 +26,6 @@ import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
 import com.zconami.Caravans.CaravansPlugin;
-import com.zconami.Caravans.exception.CaravanCreateBeneficiaryPlayerOfflineException;
 import com.zconami.Caravans.storage.DataKey;
 import com.zconami.Caravans.util.DynmapUtils;
 import com.zconami.Caravans.util.NMSUtils;
@@ -217,6 +214,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
     public void synchronizeInvestment() {
         this.caravanAccount = new AccountInventory(this.getBukkitEntity().getInventory());
+        caravanAccount.remove(caravanAccount.balance());
         this.caravanAccount.add(investment);
     }
 
@@ -317,12 +315,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         super.readData(dataKey);
 
         final UUID ownerUUID = UUID.fromString(dataKey.getString(BENEFICIARY));
-        final Player player = Bukkit.getPlayer(ownerUUID);
-        if (player == null) {
-            throw new CaravanCreateBeneficiaryPlayerOfflineException(dataKey.getPath());
-        }
-
-        this.beneficiary = getCaravansPlugin().getBeneficiaryRepository().find(player.getUniqueId().toString());
+        this.beneficiary = getCaravansPlugin().getBeneficiaryRepository().find(ownerUUID.toString());
 
         final String originKey = dataKey.getString(ORIGIN);
         this.origin = getCaravansPlugin().getRegionRepository().find(originKey);
