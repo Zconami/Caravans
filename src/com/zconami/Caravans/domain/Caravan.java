@@ -120,6 +120,10 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public static final String LOCATION_PUBLIC = "locationPublic";
     private boolean locationPublic;
 
+    public static final String INVESTMENT = "investment";
+    private long investment;
+    private AccountInventory caravanAccount;
+
     private final Faction faction;
 
     // ===================================
@@ -129,6 +133,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public Caravan(Horse horse, DataKey extraData) {
         super(horse, extraData);
         this.faction = beneficiary.getFaction();
+        synchronizeInvestment();
     }
 
     private Caravan(CaravanCreateParameters params) {
@@ -137,7 +142,9 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.faction = beneficiary.getFaction();
         this.origin = params.getOrigin();
         this.profitStrategy = params.getProfitStrategy();
+        this.investment = params.getInvestment();
 
+        synchronizeInvestment();
         caravanHasStarted();
     }
 
@@ -159,7 +166,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                 (Horse) world.spawnEntity(location, EntityType.HORSE));
 
         final long investmentBalance = new AccountInventory(inventory).balance();
-        new AccountInventory(horse.getInventory()).add(investmentBalance);
 
         final ProfitMultiplyerStrategy profitStrategy;
 
@@ -177,7 +183,8 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
             profitStrategy = ProfitMultiplyerStrategy.PvE;
         }
 
-        final CaravanCreateParameters params = new CaravanCreateParameters(horse, beneficiary, origin, profitStrategy);
+        final CaravanCreateParameters params = new CaravanCreateParameters(horse, beneficiary, origin, profitStrategy,
+                investmentBalance);
 
         return new Caravan(params);
     }
@@ -206,6 +213,11 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
     public Faction getFaction() {
         return faction;
+    }
+
+    public void synchronizeInvestment() {
+        this.caravanAccount = new AccountInventory(this.getBukkitEntity().getInventory());
+        this.caravanAccount.add(investment);
     }
 
     public void caravanHasStarted() {
@@ -297,6 +309,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         dataKey.setString(ORIGIN, origin.getKey());
         dataKey.setString(PROFIT_STRATEGY, profitStrategy.name());
         dataKey.setBoolean(LOCATION_PUBLIC, locationPublic);
+        dataKey.setLong(INVESTMENT, getInvestment());
     }
 
     @Override
@@ -318,6 +331,8 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.profitStrategy = ProfitMultiplyerStrategy.valueOf(profitStrategyName);
 
         this.locationPublic = dataKey.getBoolean(LOCATION_PUBLIC);
+
+        this.investment = dataKey.getLong(INVESTMENT);
     }
 
     // ===================================

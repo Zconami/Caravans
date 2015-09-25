@@ -16,16 +16,19 @@ public class CaravanCreateParameters extends LinkedEntityCreateParameters<Horse,
 
     private final Region origin;
 
+    private final long investment;
+
     // ===================================
     // CONSTRUCTORS
     // ===================================
 
     public CaravanCreateParameters(Horse horse, Beneficiary beneficiary, Region origin,
-            Caravan.ProfitMultiplyerStrategy profitStrategy) {
+            Caravan.ProfitMultiplyerStrategy profitStrategy, long investment) {
         super(horse);
         this.beneficiary = beneficiary;
         this.origin = origin;
         this.profitStrategy = profitStrategy;
+        this.investment = investment;
     }
 
     // ===================================
@@ -42,6 +45,10 @@ public class CaravanCreateParameters extends LinkedEntityCreateParameters<Horse,
 
     public Caravan.ProfitMultiplyerStrategy getProfitStrategy() {
         return profitStrategy;
+    }
+
+    public long getInvestment() {
+        return investment;
     }
 
 }
