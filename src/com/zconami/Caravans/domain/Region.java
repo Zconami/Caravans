@@ -15,6 +15,7 @@ public class Region extends Entity {
     // ===================================
 
     public static final int DEFAULT_RADIUS = 5;
+    public static final String DEFAULT_TYPE_OF_GOOD = "Goods";
 
     // ===================================
     // ATTRIBUTES
@@ -33,11 +34,8 @@ public class Region extends Entity {
     public static final String NAME = "name";
     private String name;
 
-    public static final String IS_ORIGIN = "isOrigin";
-    private boolean isOrigin;
-
-    public static final String IS_DESTINATION = "isDestination";
-    private boolean isDestination;
+    public static final String TYPE_OF_GOOD = "typeOfGood";
+    private String typeOfGood;
 
     public static final String REMOVE_AFTER_LAST_CARAVAN = "removeAfterLastCaravan";
     private boolean removeAfterLastCaravan = false;
@@ -78,12 +76,8 @@ public class Region extends Entity {
         return name;
     }
 
-    public boolean isOrigin() {
-        return isOrigin;
-    }
-
-    public boolean isDestination() {
-        return isDestination;
+    public String getTypeOfGood() {
+        return typeOfGood;
     }
 
     public boolean isRemoveAfterLastCaravan() {
@@ -110,8 +104,12 @@ public class Region extends Entity {
         this.center = params.getCenter();
         this.radius = params.getRadius();
         this.name = params.getName();
-        this.isOrigin = params.isOrigin();
-        this.isDestination = params.isDestination();
+        final String paramTypeOfGood = params.getTypeOfGood();
+        if (paramTypeOfGood != null) {
+            this.typeOfGood = paramTypeOfGood;
+        } else {
+            this.typeOfGood = DEFAULT_TYPE_OF_GOOD;
+        }
     }
 
     // ===================================
@@ -128,9 +126,9 @@ public class Region extends Entity {
         this.center = new Location(Bukkit.getWorld(worldUUID), centerX, centerY, centerZ);
         this.radius = dataKey.getInt(RADIUS);
         this.name = dataKey.getString(NAME);
-        this.isOrigin = dataKey.getBoolean(IS_ORIGIN);
-        this.isDestination = dataKey.getBoolean(IS_DESTINATION);
         this.removeAfterLastCaravan = dataKey.getBoolean(REMOVE_AFTER_LAST_CARAVAN);
+
+        this.typeOfGood = dataKey.getString(TYPE_OF_GOOD);
     }
 
     @Override
@@ -144,8 +142,8 @@ public class Region extends Entity {
 
         dataKey.setString(NAME, name);
 
-        dataKey.setBoolean(IS_ORIGIN, isOrigin);
-        dataKey.setBoolean(IS_DESTINATION, isDestination);
+        dataKey.setString(TYPE_OF_GOOD, typeOfGood);
+
         dataKey.setBoolean(REMOVE_AFTER_LAST_CARAVAN, removeAfterLastCaravan);
     }
 

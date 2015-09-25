@@ -1,5 +1,6 @@
 package com.zconami.Caravans.domain;
 
+import static com.zconami.Caravans.util.Utils.broadcastMessage;
 import static com.zconami.Caravans.util.Utils.getCaravansConfig;
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
 import static com.zconami.Caravans.util.Utils.getLogger;
@@ -16,10 +17,12 @@ import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.gestern.gringotts.AccountInventory;
 import org.gestern.gringotts.Util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
@@ -105,9 +108,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     // ATTRIBUTES
     // ===================================
 
-    public static final String CARAVAN_STARTED = "caravanStarted";
-    private boolean caravanStarted;
-
     public static final String BENEFICIARY = "beneficiary";
     private Beneficiary beneficiary;
 
@@ -141,13 +141,19 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         this.origin = params.getOrigin();
         this.profitStrategy = params.getProfitStrategy();
         this.passengerLoggedOut = false;
+
+        caravanHasStarted();
     }
 
     // ===================================
     // PUBLIC METHODS
     // ===================================
 
-    public static Caravan muleCaravan(Beneficiary beneficiary, Region origin) {
+    public static Caravan muleCaravan(Beneficiary beneficiary, Region origin, Inventory inventory) {
+        Preconditions.checkNotNull(beneficiary);
+        Preconditions.checkNotNull(origin);
+        Preconditions.checkNotNull(inventory);
+
         getLogger().info("Creating mule caravan");
 
         final Location location = origin.getCenter();
@@ -155,6 +161,9 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         final World world = location.getWorld();
         final Horse horse = CreateStrategy.applyStrategy(Horse.Variant.MULE,
                 (Horse) world.spawnEntity(location, EntityType.HORSE));
+
+        final long investmentBalance = new AccountInventory(inventory).balance();
+        new AccountInventory(horse.getInventory()).add(investmentBalance);
 
         final ProfitMultiplyerStrategy profitStrategy;
 
@@ -203,49 +212,41 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         return faction;
     }
 
-    public boolean isCaravanStarted() {
-        return this.caravanStarted;
-    }
-
     public void caravanHasStarted() {
-        if (this.caravanStarted == false) {
-            this.caravanStarted = true;
-            this.setDirty(true);
 
-            final CaravansPlugin plugin = getCaravansPlugin();
-            final boolean announceStart = getCaravansConfig().getBoolean("broadcasts.announceStart");
-            final int announceLocationDelay = getCaravansConfig().getInt("broadcasts.announceLocationDelay");
-            if (announceStart) {
-                final String beneficiaryName = this.getBeneficiary().getName();
-                StringBuilder announcementBuilder = new StringBuilder(
-                        String.format("A trade caravan with an investment of §a%s§f has started for %s",
-                                Util.format(this.getInvestment()), beneficiaryName));
-                if (announceLocationDelay <= 0) {
-                    final Location location = getBukkitEntity().getLocation();
-                    announcementBuilder.append(String.format(" @ %d,%d!", location.getBlockX(), location.getBlockZ()));
-                    ScoreboardUtils.setUpScoreboardCaravanTask(this);
-                    DynmapUtils.setupDynmapCaravanTask(this);
-                    locationIsPublic();
-                } else {
-                    announcementBuilder.append("!");
-                    plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
-                        @Override
-                        public void run() {
-                            if (getBukkitEntity().isValid()) {
-                                final Location location = getBukkitEntity().getLocation();
-                                plugin.getServer()
-                                        .broadcastMessage(String.format("The location of %s's caravan is %d,%d",
-                                                beneficiaryName, location.getBlockX(), location.getBlockZ()));
-                                ScoreboardUtils.setUpScoreboardCaravanTask(Caravan.this);
-                                DynmapUtils.setupDynmapCaravanTask(Caravan.this);
-                                locationIsPublic();
-                            }
+        final CaravansPlugin plugin = getCaravansPlugin();
+        final boolean announceStart = getCaravansConfig().getBoolean("broadcasts.announceStart");
+        final int announceLocationDelay = getCaravansConfig().getInt("broadcasts.announceLocationDelay");
+        if (announceStart) {
+            final String beneficiaryName = this.getBeneficiary().getName();
+            StringBuilder announcementBuilder = new StringBuilder(String.format(
+                    "A %s caravan with a cargo of %s worth §a%s§f has started for %s", this.getProfitStrategy().name(),
+                    origin.getTypeOfGood(), Util.format(this.getInvestment()), beneficiaryName));
+            if (announceLocationDelay <= 0) {
+                final Location location = getBukkitEntity().getLocation();
+                announcementBuilder.append(String.format(" @ %d,%d!", location.getBlockX(), location.getBlockZ()));
+                ScoreboardUtils.setUpScoreboardCaravanTask(this);
+                DynmapUtils.setupDynmapCaravanTask(this);
+                locationIsPublic();
+            } else {
+                announcementBuilder.append("!");
+                plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        if (getBukkitEntity().isValid()) {
+                            final Location location = getBukkitEntity().getLocation();
+                            broadcastMessage(String.format("The location of %s's caravan is %d,%d", beneficiaryName,
+                                    location.getBlockX(), location.getBlockZ()));
+                            ScoreboardUtils.setUpScoreboardCaravanTask(Caravan.this);
+                            DynmapUtils.setupDynmapCaravanTask(Caravan.this);
+                            locationIsPublic();
                         }
-                    }, Utils.ticksFromSeconds(announceLocationDelay));
-                }
-                Bukkit.getServer().broadcastMessage(announcementBuilder.toString());
+                    }
+                }, Utils.ticksFromSeconds(announceLocationDelay));
             }
+            broadcastMessage(announcementBuilder.toString());
         }
+
     }
 
     public boolean isLocationPublic() {
@@ -269,11 +270,11 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     }
 
     public boolean locationAwaitingBroadcast() {
-        return this.isCaravanStarted() && !this.isLocationPublic();
+        return !this.isLocationPublic();
     }
 
     public boolean locationBroadcasted() {
-        return this.isCaravanStarted() && this.isLocationPublic();
+        return this.isLocationPublic();
     }
 
     public boolean hasPassenger() {
@@ -297,7 +298,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     @Override
     public void writeData(DataKey dataKey) {
         super.writeData(dataKey);
-        dataKey.setBoolean(CARAVAN_STARTED, caravanStarted);
         dataKey.setString(BENEFICIARY, beneficiary.getKey());
         dataKey.setString(ORIGIN, origin.getKey());
         dataKey.setString(PROFIT_STRATEGY, profitStrategy.name());
@@ -308,7 +308,6 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     @Override
     public void readData(DataKey dataKey) {
         super.readData(dataKey);
-        this.caravanStarted = dataKey.getBoolean(CARAVAN_STARTED);
 
         final UUID ownerUUID = UUID.fromString(dataKey.getString(BENEFICIARY));
         final Player player = Bukkit.getPlayer(ownerUUID);

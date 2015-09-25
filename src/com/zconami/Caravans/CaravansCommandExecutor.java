@@ -1,6 +1,8 @@
 package com.zconami.Caravans;
 
 import static com.zconami.Caravans.util.Utils.getLogger;
+import static com.zconami.Caravans.util.Utils.sendMessage;
+import static com.zconami.Caravans.util.Utils.sendTable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
+import com.zconami.Caravans.util.ItemCallback;
 import com.zconami.Caravans.util.ScoreboardUtils;
 
 public class CaravansCommandExecutor implements CommandExecutor {
@@ -26,8 +29,6 @@ public class CaravansCommandExecutor implements CommandExecutor {
     // ===================================
     // CONSTANTS
     // ===================================
-
-    private static final int PAGE_SIZE = 5;
 
     // ===================================
     // ATTRIBUTES
@@ -69,76 +70,50 @@ public class CaravansCommandExecutor implements CommandExecutor {
                     pageNumber = Integer.valueOf(1);
                 }
 
-                final List<Caravan> caravans = caravanRepository.all();
-                if (caravans.isEmpty()) {
-                    sender.sendMessage(
-                            "No public caravans at the moment, their locations have to be broadcast before they'll show here");
-                } else {
-                    sender.sendMessage(makeHeader("PUBLICALLY KNOWN CARAVANS"));
-                    sender.sendMessage(ChatColor.GOLD + " Use " + ChatColor.BLUE + "/c track <playerName>"
-                            + ChatColor.GOLD + " to track location");
-                    sender.sendMessage(ChatColor.GOLD + "");
-                }
+                final List<Caravan> caravans = caravanRepository.all().stream().filter(Caravan::locationBroadcasted)
+                        .collect(Collectors.toList());
 
-                final List<Caravan> currentPage;
-                if (caravans.size() <= PAGE_SIZE) {
-                    currentPage = caravans;
-                } else {
-                    final int pageStart = (pageNumber - 1) * PAGE_SIZE;
-                    currentPage = caravans.subList(pageStart, pageStart + PAGE_SIZE);
-                }
-
-                for (Caravan caravan : currentPage.stream().filter(Caravan::locationBroadcasted)
-                        .collect(Collectors.toList())) {
-                    final StringBuilder builder = new StringBuilder();
-                    builder.append(" " + ChatColor.WHITE + caravan.getBeneficiary().getName() + " (");
-                    final Faction faction = caravan.getFaction();
-                    if (faction != null) {
-                        builder.append(faction.describeTo(MPlayer.get(sender)) + ChatColor.WHITE + ") ");
-                    }
-                    builder.append(ChatColor.GREEN + Util.format(caravan.getInvestment()));
-                    sender.sendMessage(builder.toString());
-                }
-
-                if (!caravans.isEmpty()) {
-                    sender.sendMessage(ChatColor.GOLD + "");
-                    sender.sendMessage(
-                            ChatColor.GOLD + " Page " + pageNumber + " of " + Math.max(caravans.size() / PAGE_SIZE, 1));
-                }
+                final String tableDescription = " Use " + ChatColor.BLUE + "/c track <playerName>" + ChatColor.GOLD
+                        + " to track location";
+                sendTable(sender, pageNumber.intValue(), "PUBLICALLY KNOWN CARAVANS", tableDescription, caravans,
+                        new ItemCallback<Caravan>() {
+                            @Override
+                            public String itemEntry(Caravan caravan) {
+                                final StringBuilder builder = new StringBuilder();
+                                builder.append(ChatColor.WHITE + caravan.getBeneficiary().getName() + " (");
+                                final Faction faction = caravan.getFaction();
+                                if (faction != null) {
+                                    builder.append(faction.describeTo(MPlayer.get(sender)) + ChatColor.WHITE + ") ");
+                                }
+                                builder.append(ChatColor.GREEN + Util.format(caravan.getInvestment()));
+                                return builder.toString();
+                            }
+                        });
                 return true;
             } else if (secondary.equalsIgnoreCase("track") && args.length == 2 && sender instanceof Player) {
 
                 final String playerName = args[1];
                 final Beneficiary targetBeneficiary = beneficiaryRepository.findByName(playerName);
                 if (targetBeneficiary == null) {
-                    sender.sendMessage("Can't find that player, are you sure you typed it right?");
+                    sendMessage(sender, "Can't find that player, are you sure you typed it right?");
                     return true;
                 }
 
                 final Caravan targetCaravan = caravanRepository.findByBeneficiary(targetBeneficiary);
-                if (targetCaravan.isCaravanStarted() && targetCaravan.isLocationPublic()) {
+                if (targetCaravan.isLocationPublic()) {
                     ScoreboardUtils.showScoreboard((Player) sender, targetCaravan);
-                    sender.sendMessage("Now tracking " + playerName + "'s caravan");
+                    sendMessage(sender, "Now tracking " + playerName + "'s caravan");
                 } else {
-                    sender.sendMessage("Could not find that caravan, has their location been broadcast yet?");
+                    sendMessage(sender, "Could not find that caravan, has their location been broadcast yet?");
                 }
                 return true;
             } else {
-                sender.sendMessage("/c help - this help page");
-                sender.sendMessage("/c list - lists active caravans with public locations");
-                sender.sendMessage("/c track <playerName> - track player's caravan");
+                sendMessage(sender, "/c help - this help page");
+                sendMessage(sender, "/c list - lists active caravans with public locations");
+                sendMessage(sender, "/c track <playerName> - track player's caravan");
                 return true;
             }
         }
         return false;
     }
-
-    private String makeHeader(String text) {
-        final StringBuilder stringBuilder = new StringBuilder(ChatColor.GOLD + "▀▀▀ " + text + " ");
-        for (int i = 0; i < 40 - text.length(); i++) {
-            stringBuilder.append("▀");
-        }
-        return stringBuilder.toString();
-    }
-
 }

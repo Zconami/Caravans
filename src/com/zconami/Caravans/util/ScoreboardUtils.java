@@ -1,7 +1,7 @@
 package com.zconami.Caravans.util;
 
 import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
-import static com.zconami.Caravans.util.Utils.getGringottsNamePlural;
+import static com.zconami.Caravans.util.Utils.getGringottsName;
 import static com.zconami.Caravans.util.Utils.getScheduler;
 import static com.zconami.Caravans.util.Utils.getScoreboardManager;
 
@@ -79,7 +79,6 @@ public class ScoreboardUtils {
 
                         final Score estimatedReturn = objective.getScore("Estimated Return");
                         estimatedReturn.setScore((int) caravan.getReturn(location));
-
                     }
                 }
             }
@@ -179,7 +178,8 @@ public class ScoreboardUtils {
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(getName(caravan, relation));
 
-        final Score scoreValue = objective.getScore("§a" + getGringottsNamePlural() + "§f");
+        final Score scoreValue = objective
+                .getScore(caravan.getOrigin().getTypeOfGood() + " §a" + getGringottsName() + "§f Value");
         scoreValue.setScore((int) caravan.getInvestment());
 
         return scoreboard;

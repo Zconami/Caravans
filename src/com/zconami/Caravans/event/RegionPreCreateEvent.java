@@ -24,9 +24,8 @@ public class RegionPreCreateEvent extends Event {
 
     private final String name;
     private final Location location;
-    private final Boolean isOrigin;
-    private final Boolean isDestination;
     private final int radius;
+    private final String typeOfGood;
 
     // ===================================
     // CONSTRUCTORS
@@ -39,8 +38,7 @@ public class RegionPreCreateEvent extends Event {
     public RegionPreCreateEvent(Block signBlock, List<Matcher> matchers, int radius) {
         this.name = matchers.get(1).group("regionName");
         this.location = signBlock.getLocation();
-        this.isOrigin = matchers.get(2).group("bool").equalsIgnoreCase("Yes");
-        this.isDestination = matchers.get(3).group("bool").equalsIgnoreCase("Yes");
+        this.typeOfGood = matchers.get(3).group("typeOfGood");
         this.radius = radius;
     }
 
@@ -56,12 +54,8 @@ public class RegionPreCreateEvent extends Event {
         return location;
     }
 
-    public Boolean getIsOrigin() {
-        return isOrigin;
-    }
-
-    public Boolean getIsDestination() {
-        return isDestination;
+    public String getTypeOfGood() {
+        return typeOfGood;
     }
 
     public int getRadius() {

@@ -1,22 +1,33 @@
 package com.zconami.Caravans.listener;
 
 import static com.zconami.Caravans.util.Utils.getCaravansConfig;
+import static com.zconami.Caravans.util.Utils.getGringottsNamePlural;
+import static com.zconami.Caravans.util.Utils.getRemoteInventory;
+import static com.zconami.Caravans.util.Utils.isCurrency;
+import static com.zconami.Caravans.util.Utils.sendMessage;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
+import org.gestern.gringotts.AccountInventory;
 
+import com.google.common.collect.Maps;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
@@ -52,6 +63,7 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
     private final CaravanRepository caravanRepository;
     private final BeneficiaryRepository beneficiaryRepository;
     private final RegionRepository regionRepository;
+    private final Map<Player, InvestmentInventoryWrapper> playerInvestmentInventories = Maps.newHashMap();
 
     // ===================================
     // CONSTRUCTORS
@@ -76,9 +88,7 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
         final Location location = event.getLocation();
         final RegionCreateParameters params = new RegionCreateParameters(UUID.randomUUID().toString(), name, location,
                 radius);
-
-        params.setOrigin(event.getIsOrigin());
-        params.setDestination(event.getIsDestination());
+        params.setTypeOfGood(event.getTypeOfGood());
 
         final Region savedRegion = regionRepository.save(Region.create(params));
         createMarker(savedRegion);
@@ -87,25 +97,21 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
     @EventHandler
     public void onRegionInteract(RegionInteractEvent event) {
         final Region origin = regionRepository.findByName(event.getName());
+        final Player player = event.getPlayer();
         if (origin == null) {
-            event.getPlayer().sendMessage("Region not setup properly");
+            sendMessage(player, "Region not setup properly");
             return;
         }
 
-        if (!origin.isOrigin()) {
-            event.getPlayer().sendMessage("This region does not allow exports");
-            return;
-        }
-
-        final Beneficiary beneficiary = findOrCreate(event.getPlayer());
-        final Faction playerFaction = MPlayer.get(event.getPlayer()).getFaction();
+        final Beneficiary beneficiary = findOrCreate(player);
+        final Faction playerFaction = MPlayer.get(player).getFaction();
         if (!beneficiary.getFaction().getId().equals(playerFaction.getId())) {
             beneficiary.setFaction(playerFaction);
         }
 
         final boolean exisitingCaravan = caravanRepository.findByBeneficiary(beneficiary) != null;
         if (exisitingCaravan) {
-            event.getPlayer().sendMessage("You've already got an active caravan!");
+            sendMessage(player, "You've already got an active caravan!");
             return;
         }
 
@@ -113,7 +119,7 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
         final long cooldownFinishedMillis = beneficiary.getLastSuccessfulCaravan() + cooldownSeconds * 1000;
         if (System.currentTimeMillis() < cooldownFinishedMillis) {
             final java.util.Date cooldownFinisihedDate = new java.util.Date(cooldownFinishedMillis);
-            event.getPlayer().sendMessage("You've had a successful run recently! You can start another at "
+            sendMessage(player, "You've had a successful run recently! You can start another at "
                     + ChatColor.DARK_PURPLE + DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(cooldownFinisihedDate));
             return;
         }
@@ -121,19 +127,53 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
         final boolean onePerFaction = getCaravansConfig().getBoolean("caravans.oneActivePerFaction");
         if (onePerFaction) {
             if (playerFaction.getId().equals(Factions.ID_NONE)) {
-                event.getPlayer().sendMessage("You must be in a faction to have a caravan!");
+                sendMessage(player, "You must be in a faction to have a caravan!");
                 return;
             }
             if (caravanRepository.findByFaction(playerFaction) != null) {
-                event.getPlayer().sendMessage("Your faction already has an active caravan!");
+                sendMessage(player, "Your faction already has an active caravan!");
                 return;
             }
         }
 
-        final Caravan caravan = caravanRepository.save(Caravan.muleCaravan(beneficiary, origin));
-        final CaravanPostCreateEvent caravanCreateEvent = new CaravanPostCreateEvent(caravan);
-        event.getPlayer().sendMessage("Carvan created at " + caravan.getProfitStrategy().name() + " profit rate");
-        Bukkit.getServer().getPluginManager().callEvent(caravanCreateEvent);
+        final Inventory inventory = getRemoteInventory(origin.getTypeOfGood() + " Investment");
+        player.openInventory(inventory);
+
+        final InvestmentInventoryWrapper investmentInventory = new InvestmentInventoryWrapper(origin, inventory);
+        playerInvestmentInventories.put(player, investmentInventory);
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        final HumanEntity humanEntity = event.getPlayer();
+
+        if (humanEntity instanceof Player) {
+            final Player player = (Player) humanEntity;
+            final InvestmentInventoryWrapper investmentInventory = playerInvestmentInventories.get(player);
+            if (investmentInventory != null && investmentInventory.getInventory() != null) {
+                final Inventory inventory = investmentInventory.getInventory();
+
+                if (new AccountInventory(inventory).balance() > 0) {
+                    final Beneficiary beneficiary = findOrCreate(player);
+                    final Caravan caravan = caravanRepository
+                            .save(Caravan.muleCaravan(beneficiary, investmentInventory.getRegion(), inventory));
+                    final CaravanPostCreateEvent caravanCreateEvent = new CaravanPostCreateEvent(caravan);
+                    Bukkit.getServer().getPluginManager().callEvent(caravanCreateEvent);
+                } else {
+                    sendMessage(player, "You must invest some " + getGringottsNamePlural()
+                            + " in cargo before you can create a caravan!");
+                }
+                inventory.clear();
+                playerInvestmentInventories.remove(player);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (isInvestmentInventory(event.getClickedInventory()) && !isCurrency(event.getCursor())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -175,8 +215,7 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
         final Marker createdMarker = markerSet.createMarker(getMarkerId(region), region.getName(), true,
                 regionCenter.getWorld().getName(), regionCenter.getX(), regionCenter.getY(), regionCenter.getZ(),
                 getMarkerIcon(), true);
-        createdMarker.setDescription("<strong>Exports:</strong> " + (region.isOrigin() ? "Yes" : "No")
-                + "<br/><strong>Imports:</strong> " + (region.isDestination() ? "Yes" : "No"));
+        createdMarker.setDescription("Exports " + region.getTypeOfGood());
     }
 
     private void removeMarker(Region region) {
@@ -210,6 +249,39 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
         }
         final BeneficiaryCreateParameters params = new BeneficiaryCreateParameters(player);
         return beneficiaryRepository.save(Beneficiary.create(params));
+    }
+
+    private boolean isInvestmentInventory(Inventory inventory) {
+        for (InvestmentInventoryWrapper wrapper : playerInvestmentInventories.values()) {
+            if (wrapper.getInventory().equals(inventory)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ===================================
+    // NESTED CLASSES
+    // ===================================
+
+    protected class InvestmentInventoryWrapper {
+
+        private final Region region;
+        private final Inventory inventory;
+
+        protected InvestmentInventoryWrapper(Region region, Inventory inventory) {
+            this.region = region;
+            this.inventory = inventory;
+        }
+
+        public Region getRegion() {
+            return region;
+        }
+
+        public Inventory getInventory() {
+            return inventory;
+        }
+
     }
 
 }

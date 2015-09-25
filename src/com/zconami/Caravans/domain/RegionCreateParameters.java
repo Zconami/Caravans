@@ -12,8 +12,7 @@ public class RegionCreateParameters extends EntityCreateParameters {
     private final Location center;
     private final int radius;
 
-    private boolean isOrigin = true;
-    private boolean isDestination = true;
+    private String typeOfGood;
 
     // ===================================
     // CONSTRUCTORS
@@ -42,20 +41,12 @@ public class RegionCreateParameters extends EntityCreateParameters {
         return radius;
     }
 
-    public boolean isOrigin() {
-        return isOrigin;
+    public String getTypeOfGood() {
+        return typeOfGood;
     }
 
-    public void setOrigin(boolean isOrigin) {
-        this.isOrigin = isOrigin;
-    }
-
-    public boolean isDestination() {
-        return isDestination;
-    }
-
-    public void setDestination(boolean isDestination) {
-        this.isDestination = isDestination;
+    public void setTypeOfGood(String typeOfGood) {
+        this.typeOfGood = typeOfGood;
     }
 
 }

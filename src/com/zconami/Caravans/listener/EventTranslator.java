@@ -35,6 +35,7 @@ import com.zconami.Caravans.event.RegionPreCreateEvent;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.util.CaravansUtils;
+import com.zconami.Caravans.util.Utils;
 
 public class EventTranslator implements Listener {
 
@@ -48,8 +49,8 @@ public class EventTranslator implements Listener {
     private final Pattern[] signValidators = new Pattern[] {
             Pattern.compile("\\[Caravans\\]"),
             Pattern.compile("(?<regionName>[a-zA-Z0-9_]+)"),
-            Pattern.compile("Exports: (?<bool>Yes|No)"),
-            Pattern.compile("Imports: (?<bool>Yes|No)")
+            Pattern.compile("Exports"),
+            Pattern.compile("(?<typeOfGood>[a-zA-Z0-9_]+)")
     };
 
     public EventTranslator(BeneficiaryRepository beneficiaryRepository, CaravanRepository caravanRepository) {
@@ -73,6 +74,7 @@ public class EventTranslator implements Listener {
 
                 event.setLine(0, ChatColor.GREEN + "[Caravans]");
                 event.setLine(1, regionCreateEvent.getName());
+                event.setLine(3, regionCreateEvent.getTypeOfGood());
             } else {
                 event.setCancelled(true);
             }
@@ -138,6 +140,7 @@ public class EventTranslator implements Listener {
         final LivingEntity entity = event.getEntity();
         if (CaravansUtils.isCaravan(entity)) {
             final Caravan caravan = caravanRepository.find((Horse) entity);
+            event.getDrops().removeIf(Utils::isNotCurrency);
             final CaravanDestroyEvent caravanDestroyEvent = new CaravanDestroyEvent(caravan, entity.getKiller());
             Bukkit.getServer().getPluginManager().callEvent(caravanDestroyEvent);
         }
