@@ -61,7 +61,7 @@ public class CaravansPlugin extends JavaPlugin {
         this.commandExecutor = new CaravansCommandExecutor(regionRepository, beneficiaryRepository, caravanRepository);
         this.eventTranslator = new EventTranslator(beneficiaryRepository, caravanRepository);
         this.chunkEventListner = new ChunkEventListener(caravanRepository);
-        this.caravanEventListener = new CaravanEventListener(dynmap, caravanRepository, regionRepository);
+        this.caravanEventListener = new CaravanEventListener(caravanRepository, regionRepository);
         this.regionEventListener = new RegionEventListener(dynmap, caravanRepository, beneficiaryRepository,
                 regionRepository);
         this.playerEventListener = new PlayerEventListener(caravanRepository);

@@ -10,12 +10,13 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.InventoryHolder;
-import org.dynmap.DynmapAPI;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.Util;
@@ -38,7 +39,6 @@ public class CaravanEventListener implements Listener {
     // ATTRIBUTES
     // ===================================
 
-    private final DynmapAPI dynmap;
     private final CaravanRepository caravanRepository;
     private final RegionRepository regionRepository;
 
@@ -46,9 +46,7 @@ public class CaravanEventListener implements Listener {
     // CONSTRUCTORS
     // ===================================
 
-    public CaravanEventListener(DynmapAPI dynmap, CaravanRepository caravanRepository,
-            RegionRepository regionRepository) {
-        this.dynmap = dynmap;
+    public CaravanEventListener(CaravanRepository caravanRepository, RegionRepository regionRepository) {
         this.caravanRepository = caravanRepository;
         this.regionRepository = regionRepository;
     }
@@ -67,6 +65,16 @@ public class CaravanEventListener implements Listener {
 
     @EventHandler
     public void onCaravanMount(CaravanMountEvent event) {
+    }
+
+    @EventHandler
+    public void onEntityPortalEvent(EntityPortalEvent event) {
+        final Entity entity = event.getEntity();
+        if (CaravansUtils.isCaravan(entity)) {
+            final Caravan caravan = caravanRepository.find((Horse) entity);
+            caravan.dismount();
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
