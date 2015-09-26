@@ -3,7 +3,7 @@ package com.zconami.Caravans.listener;
 import static com.zconami.Caravans.util.Utils.getCaravansConfig;
 import static com.zconami.Caravans.util.Utils.getGringottsNamePlural;
 import static com.zconami.Caravans.util.Utils.getRemoteInventory;
-import static com.zconami.Caravans.util.Utils.isCurrency;
+import static com.zconami.Caravans.util.Utils.isNotCurrency;
 import static com.zconami.Caravans.util.Utils.sendMessage;
 
 import java.util.Map;
@@ -17,7 +17,6 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.dynmap.DynmapAPI;
@@ -163,16 +162,15 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
                     sendMessage(player, "You must invest some " + getGringottsNamePlural()
                             + " in cargo before you can create a caravan!");
                 }
+                inventory.forEach(itemStack -> {
+                    if (isNotCurrency(itemStack)) {
+                        final Location location = investmentInventory.getRegion().getCenter();
+                        location.getWorld().dropItem(location, itemStack);
+                    }
+                });
                 inventory.clear();
                 playerInvestmentInventories.remove(player);
             }
-        }
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (isInvestmentInventory(event.getClickedInventory()) && !isCurrency(event.getCursor())) {
-            event.setCancelled(true);
         }
     }
 
