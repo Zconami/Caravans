@@ -77,6 +77,7 @@ public class Utils {
         for (String entry : entries) {
             entry = String.format(" %d: %s", entryIndex, entry);
             sender.sendMessage(entry);
+            entryIndex++;
         }
 
         int requiredBlankLines = PAGE_SIZE - currentPage.size();
