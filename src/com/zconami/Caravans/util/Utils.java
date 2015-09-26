@@ -65,6 +65,7 @@ public class Utils {
 
         final List<I> currentPage;
         if (allItems.size() <= PAGE_SIZE) {
+            pageNumber = 1;
             currentPage = allItems;
         } else {
             final int pageStart = (pageNumber - 1) * PAGE_SIZE;
