@@ -73,7 +73,7 @@ public class Utils {
         }
 
         final List<String> entries = currentPage.stream().map(callback::itemEntry).collect(Collectors.toList());
-        // Page number is 0 indexed, so correct
+        // Page number is NOT 0 indexed, so correct
         int entryIndex = (PAGE_SIZE * (pageNumber - 1)) + 1;
         for (String entry : entries) {
             entry = String.format(" %d: %s", entryIndex, entry);
