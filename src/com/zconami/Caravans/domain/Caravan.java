@@ -13,10 +13,12 @@ import java.util.stream.Collectors;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Sign;
 import org.gestern.gringotts.AccountInventory;
 import org.gestern.gringotts.Util;
 
@@ -156,7 +158,9 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
 
         getLogger().info("Creating mule caravan");
 
-        final Location location = origin.getCenter();
+        final Block block = origin.getCenter().getBlock();
+        Sign sign = (Sign) block.getState().getData();
+        final Location location = block.getRelative(sign.getFacing()).getLocation();
 
         final World world = location.getWorld();
         final Horse horse = CreateStrategy.applyStrategy(Horse.Variant.MULE,
