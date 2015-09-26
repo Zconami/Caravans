@@ -75,7 +75,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
 
                 final String tableDescription = " Use " + ChatColor.BLUE + "/c track <playerName>" + ChatColor.GOLD
                         + " to track location";
-                sendTable(sender, pageNumber.intValue(), "PUBLICALLY KNOWN CARAVANS", tableDescription, caravans,
+                sendTable(sender, pageNumber.intValue(), "CARAVANS WITH PUBLIC LOCATIONS", tableDescription, caravans,
                         new ItemCallback<Caravan>() {
                             @Override
                             public String itemEntry(Caravan caravan) {

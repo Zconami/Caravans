@@ -3,6 +3,7 @@ package com.zconami.Caravans.util;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -70,7 +71,13 @@ public class Utils {
             currentPage = allItems.subList(pageStart, pageStart + PAGE_SIZE);
         }
 
-        currentPage.stream().map(callback::itemEntry).forEach(sender::sendMessage);
+        final List<String> entries = currentPage.stream().map(callback::itemEntry).collect(Collectors.toList());
+        // Page number is 0 indexed, so correct
+        int entryIndex = (PAGE_SIZE * (pageNumber - 1)) + 1;
+        for (String entry : entries) {
+            entry = String.format(" %d: %s", entryIndex, entry);
+            sender.sendMessage(entry);
+        }
 
         int requiredBlankLines = PAGE_SIZE - currentPage.size();
         for (int i = 0; i < requiredBlankLines; i++) {

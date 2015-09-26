@@ -163,7 +163,7 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
                             + " in cargo before you can create a caravan!");
                 }
                 inventory.forEach(itemStack -> {
-                    if (isNotCurrency(itemStack)) {
+                    if (itemStack != null && isNotCurrency(itemStack)) {
                         final Location location = investmentInventory.getRegion().getCenter();
                         location.getWorld().dropItem(location, itemStack);
                     }
