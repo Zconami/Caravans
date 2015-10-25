@@ -45,25 +45,22 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     public enum ProfitMultiplyerStrategy {
         PvE {
             @Override
-            protected double calculateExponent(Region origin, Location destination) {
+            protected double calculateMultiplyer(Region origin, Location destination) {
                 final double reward = getCaravansConfig().getDouble("caravans.profitMultiplyer.PvEReward");
-                return distanceByReward(origin, destination, reward);
+                final double distance = destination.distance(origin.getCenter());
+                return reward * distance + 1.0;
             }
         },
         PvP {
             @Override
-            protected double calculateExponent(Region origin, Location destination) {
+            protected double calculateMultiplyer(Region origin, Location destination) {
                 final double reward = getCaravansConfig().getDouble("caravans.profitMultiplyer.PvPReward");
-                return distanceByReward(origin, destination, reward);
+                final double distance = destination.distance(origin.getCenter());
+                return reward * distance + 1.0;
             }
         };
 
-        private static double distanceByReward(Region origin, Location destination, double reward) {
-            final double distance = destination.distance(origin.getCenter());
-            return 1.0 + (distance * reward);
-        }
-
-        protected abstract double calculateExponent(Region origin, Location destination);
+        protected abstract double calculateMultiplyer(Region origin, Location destination);
 
     }
 
@@ -79,7 +76,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                 horse.setMaxHealth(200);
                 horse.setHealth(200);
                 horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-                NMSUtils.setHorseSpeed(horse, 0.14f);
+                NMSUtils.setHorseSpeed(horse, 0.09f);
                 return horse;
             }
         };
@@ -203,8 +200,8 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
     }
 
     public long getReturn(Location destination) {
-        final double calculatedExpoent = getProfitStrategy().calculateExponent(getOrigin(), destination);
-        final double calculatedReturn = Math.pow(getInvestment(), calculatedExpoent);
+        final double calculatedMultiplyer = getProfitStrategy().calculateMultiplyer(getOrigin(), destination);
+        final double calculatedReturn = getInvestment() * calculatedMultiplyer;
         return (long) Math.floor(calculatedReturn);
     }
 
