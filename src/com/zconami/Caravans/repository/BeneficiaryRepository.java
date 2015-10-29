@@ -5,7 +5,8 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
-import com.zconami.Caravans.storage.DataKey;
+import com.zconami.Core.repository.Repository;
+import com.zconami.Core.storage.DataKey;
 
 public class BeneficiaryRepository extends Repository<Beneficiary> {
 

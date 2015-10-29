@@ -1,8 +1,8 @@
 package com.zconami.Caravans;
 
-import static com.zconami.Caravans.util.Utils.getLogger;
-import static com.zconami.Caravans.util.Utils.sendMessage;
-import static com.zconami.Caravans.util.Utils.sendTable;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansLogger;
+import static com.zconami.Core.util.Utils.sendMessage;
+import static com.zconami.Core.util.Utils.sendTable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,8 +21,8 @@ import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
-import com.zconami.Caravans.util.ItemCallback;
 import com.zconami.Caravans.util.ScoreboardUtils;
+import com.zconami.Core.util.ItemCallback;
 
 public class CaravansCommandExecutor implements CommandExecutor {
 
@@ -55,7 +55,7 @@ public class CaravansCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        getLogger().info("Command executed: " + command.getName());
+        getCaravansLogger().info("Command executed: " + command.getName());
         if (command.getName().equalsIgnoreCase("c") && args.length > 0) {
             final String secondary = args[0];
             if (secondary.equalsIgnoreCase("list")) {

@@ -1,6 +1,6 @@
 package com.zconami.Caravans.util;
 
-import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansPlugin;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;

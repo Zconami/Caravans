@@ -12,7 +12,8 @@ import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.domain.Region;
-import com.zconami.Caravans.storage.DataKey;
+import com.zconami.Core.repository.LinkedRepository;
+import com.zconami.Core.storage.DataKey;
 
 import net.minecraft.server.v1_8_R3.EntityHorse;
 

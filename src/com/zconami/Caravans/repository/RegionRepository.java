@@ -5,7 +5,8 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Region;
-import com.zconami.Caravans.storage.DataKey;
+import com.zconami.Core.repository.Repository;
+import com.zconami.Core.storage.DataKey;
 
 public class RegionRepository extends Repository<Region> {
 

@@ -1,10 +1,8 @@
 package com.zconami.Caravans.listener;
 
-import static com.zconami.Caravans.util.Utils.getCaravansConfig;
-import static com.zconami.Caravans.util.Utils.getGringottsNamePlural;
-import static com.zconami.Caravans.util.Utils.getRemoteInventory;
-import static com.zconami.Caravans.util.Utils.isNotCurrency;
-import static com.zconami.Caravans.util.Utils.sendMessage;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansConfig;
+import static com.zconami.Core.util.Utils.getRemoteInventory;
+import static com.zconami.Core.util.Utils.sendMessage;
 
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +31,6 @@ import com.massivecraft.factions.entity.MPlayer;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.BeneficiaryCreateParameters;
 import com.zconami.Caravans.domain.Caravan;
-import com.zconami.Caravans.domain.EntityObserver;
 import com.zconami.Caravans.domain.Region;
 import com.zconami.Caravans.domain.RegionCreateParameters;
 import com.zconami.Caravans.event.CaravanPostCreateEvent;
@@ -43,6 +40,8 @@ import com.zconami.Caravans.event.RegionPreCreateEvent;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
+import com.zconami.Caravans.util.GringottsUtils;
+import com.zconami.Core.domain.EntityObserver;
 
 public class RegionEventListener implements Listener, EntityObserver<Region> {
 
@@ -159,11 +158,11 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
                     final CaravanPostCreateEvent caravanCreateEvent = new CaravanPostCreateEvent(caravan);
                     Bukkit.getServer().getPluginManager().callEvent(caravanCreateEvent);
                 } else {
-                    sendMessage(player, "You must invest some " + getGringottsNamePlural()
+                    sendMessage(player, "You must invest some " + GringottsUtils.getGringottsNamePlural()
                             + " in cargo before you can create a caravan!");
                 }
                 inventory.forEach(itemStack -> {
-                    if (itemStack != null && isNotCurrency(itemStack)) {
+                    if (itemStack != null && GringottsUtils.isNotCurrency(itemStack)) {
                         final Location location = investmentInventory.getRegion().getCenter();
                         location.getWorld().dropItem(location, itemStack);
                     }

@@ -1,7 +1,7 @@
 package com.zconami.Caravans.util;
 
-import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
-import static com.zconami.Caravans.util.Utils.getScheduler;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansPlugin;
+import static com.zconami.Core.util.Utils.getScheduler;
 
 import java.util.Collection;
 import java.util.Map;
@@ -20,6 +20,7 @@ import org.dynmap.markers.PolyLineMarker;
 
 import com.google.common.collect.Maps;
 import com.zconami.Caravans.domain.Caravan;
+import com.zconami.Core.util.Utils;
 
 public class DynmapUtils {
 

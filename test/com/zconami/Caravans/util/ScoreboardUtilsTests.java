@@ -28,6 +28,7 @@ import com.massivecraft.factions.util.RelationUtil;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.mock.MockObjective;
+import com.zconami.Core.util.Utils;
 
 @PrepareForTest({
         MPlayer.class,

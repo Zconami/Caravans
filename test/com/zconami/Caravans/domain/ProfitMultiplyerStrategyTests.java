@@ -13,7 +13,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.zconami.Caravans.domain.Caravan.ProfitMultiplyerStrategy;
-import com.zconami.Caravans.util.Utils;
+import com.zconami.Core.util.Utils;
 
 @PrepareForTest(Utils.class)
 public class ProfitMultiplyerStrategyTests extends PowerMockTestCase {

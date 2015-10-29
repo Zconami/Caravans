@@ -19,8 +19,8 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 import com.massivecraft.factions.entity.Faction;
-import com.zconami.Caravans.util.NMSUtils;
-import com.zconami.Caravans.util.Utils;
+import com.zconami.Core.util.NMSUtils;
+import com.zconami.Core.util.Utils;
 
 import net.minecraft.server.v1_8_R3.EntityHorse;
 

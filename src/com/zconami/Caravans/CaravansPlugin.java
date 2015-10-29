@@ -1,10 +1,12 @@
 package com.zconami.Caravans;
 
-import static com.zconami.Caravans.util.Utils.ticksFromSeconds;
+import static com.zconami.Core.util.Utils.ticksFromSeconds;
+
+import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 import org.dynmap.bukkit.DynmapPlugin;
 
@@ -19,8 +21,10 @@ import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.repository.RegionRepository;
 import com.zconami.Caravans.util.DynmapUtils;
 import com.zconami.Caravans.util.ScoreboardUtils;
+import com.zconami.Core.ZconamiPlugin;
+import com.zconami.Core.util.Utils;
 
-public class CaravansPlugin extends JavaPlugin {
+public class CaravansPlugin extends ZconamiPlugin {
 
     // ===================================
     // CONSTANTS
@@ -31,6 +35,8 @@ public class CaravansPlugin extends JavaPlugin {
     // ===================================
     // ATTRIBUTES
     // ===================================
+
+    private static CaravansPlugin instance;
 
     private final CaravansCommandExecutor commandExecutor;
     private final EventTranslator eventTranslator;
@@ -51,6 +57,9 @@ public class CaravansPlugin extends JavaPlugin {
 
     public CaravansPlugin() {
         super();
+
+        // FIXME Find another way, too lazy atm
+        CaravansPlugin.instance = this;
 
         this.regionRepository = new RegionRepository(this);
         this.beneficiaryRepository = new BeneficiaryRepository(this);
@@ -82,6 +91,18 @@ public class CaravansPlugin extends JavaPlugin {
 
     public CaravanRepository getCaravanRepository() {
         return caravanRepository;
+    }
+
+    public static Logger getCaravansLogger() {
+        return Utils.getLogger(PLUGIN_NAME);
+    }
+
+    public static CaravansPlugin getCaravansPlugin() {
+        return instance;
+    }
+
+    public static FileConfiguration getCaravansConfig() {
+        return Utils.getPluginConfig(PLUGIN_NAME);
     }
 
     // ===================================

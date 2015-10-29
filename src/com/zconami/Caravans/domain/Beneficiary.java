@@ -9,7 +9,8 @@ import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.FactionColl;
 import com.massivecraft.factions.entity.MPlayer;
-import com.zconami.Caravans.storage.DataKey;
+import com.zconami.Core.domain.Entity;
+import com.zconami.Core.storage.DataKey;
 
 public class Beneficiary extends Entity {
 

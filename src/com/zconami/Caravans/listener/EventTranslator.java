@@ -1,6 +1,6 @@
 package com.zconami.Caravans.listener;
 
-import static com.zconami.Caravans.util.Utils.isSignBlock;
+import static com.zconami.Core.util.Utils.isSignBlock;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -35,7 +35,7 @@ import com.zconami.Caravans.event.RegionPreCreateEvent;
 import com.zconami.Caravans.repository.BeneficiaryRepository;
 import com.zconami.Caravans.repository.CaravanRepository;
 import com.zconami.Caravans.util.CaravansUtils;
-import com.zconami.Caravans.util.Utils;
+import com.zconami.Caravans.util.GringottsUtils;
 
 public class EventTranslator implements Listener {
 
@@ -140,7 +140,7 @@ public class EventTranslator implements Listener {
         final LivingEntity entity = event.getEntity();
         if (CaravansUtils.isCaravan(entity)) {
             final Caravan caravan = caravanRepository.find((Horse) entity);
-            event.getDrops().removeIf(Utils::isNotCurrency);
+            event.getDrops().removeIf(GringottsUtils::isNotCurrency);
             final CaravanDestroyEvent caravanDestroyEvent = new CaravanDestroyEvent(caravan, entity.getKiller());
             Bukkit.getServer().getPluginManager().callEvent(caravanDestroyEvent);
         }

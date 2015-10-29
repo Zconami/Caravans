@@ -2,6 +2,8 @@ package com.zconami.Caravans.domain;
 
 import org.bukkit.Location;
 
+import com.zconami.Core.domain.EntityCreateParameters;
+
 public class RegionCreateParameters extends EntityCreateParameters {
 
     // ===================================

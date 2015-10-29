@@ -2,6 +2,8 @@ package com.zconami.Caravans.domain;
 
 import org.bukkit.entity.Horse;
 
+import com.zconami.Core.domain.LinkedEntityCreateParameters;
+
 import net.minecraft.server.v1_8_R3.EntityHorse;
 
 public class CaravanCreateParameters extends LinkedEntityCreateParameters<Horse, EntityHorse> {

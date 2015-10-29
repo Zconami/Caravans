@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
+import com.zconami.Core.domain.EntityCreateParameters;
 
 public class BeneficiaryCreateParameters extends EntityCreateParameters {
 

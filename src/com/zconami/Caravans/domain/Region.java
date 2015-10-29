@@ -6,7 +6,8 @@ import org.apache.logging.log4j.core.helpers.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-import com.zconami.Caravans.storage.DataKey;
+import com.zconami.Core.domain.Entity;
+import com.zconami.Core.storage.DataKey;
 
 public class Region extends Entity {
 

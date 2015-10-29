@@ -1,8 +1,8 @@
 package com.zconami.Caravans.listener;
 
-import static com.zconami.Caravans.util.Utils.broadcastMessage;
-import static com.zconami.Caravans.util.Utils.getCaravansConfig;
-import static com.zconami.Caravans.util.Utils.getLogger;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansConfig;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansLogger;
+import static com.zconami.Core.util.Utils.broadcastMessage;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.event.EventHandler;
@@ -59,7 +60,7 @@ public class CaravanEventListener implements Listener {
     public void onCaravanCreate(CaravanPostCreateEvent event) {
         final Caravan caravan = event.getCaravan();
         final String playerName = caravan.getBeneficiary().getName();
-        getLogger().info(
+        getCaravansLogger().info(
                 "Caravan created for " + playerName + " with investment of " + Util.format(caravan.getInvestment()));
     }
 
@@ -83,6 +84,19 @@ public class CaravanEventListener implements Listener {
         final Horse horse = caravan.getBukkitEntity();
         final Location location = horse.getLocation();
         final Region origin = caravan.getOrigin();
+
+        if (horse.isLeashed()) {
+            getCaravansLogger().info("Horse is leashed");
+            final Entity leashHolder = horse.getLeashHolder();
+            if (leashHolder != null) {
+                getCaravansLogger().info("leashHolder != null");
+                final Entity leashHolderVehicle = leashHolder.getVehicle();
+                if (leashHolderVehicle != null && leashHolderVehicle instanceof Boat) {
+                    getCaravansLogger().info("leashHolderVehicle is a boat");
+                    horse.setLeashHolder(null);
+                }
+            }
+        }
 
         if (!location.getChunk().equals(caravan.getChunk())) {
             caravan.setChunk(location.getChunk());

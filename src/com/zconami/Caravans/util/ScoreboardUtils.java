@@ -1,9 +1,9 @@
 package com.zconami.Caravans.util;
 
-import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
-import static com.zconami.Caravans.util.Utils.getGringottsName;
-import static com.zconami.Caravans.util.Utils.getScheduler;
-import static com.zconami.Caravans.util.Utils.getScoreboardManager;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansPlugin;
+import static com.zconami.Caravans.util.GringottsUtils.getGringottsName;
+import static com.zconami.Core.util.Utils.getScheduler;
+import static com.zconami.Core.util.Utils.getScoreboardManager;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,6 +22,7 @@ import com.massivecraft.factions.Rel;
 import com.massivecraft.factions.entity.MPlayer;
 import com.massivecraft.factions.util.RelationUtil;
 import com.zconami.Caravans.domain.Caravan;
+import com.zconami.Core.util.Utils;
 
 public class ScoreboardUtils {
 

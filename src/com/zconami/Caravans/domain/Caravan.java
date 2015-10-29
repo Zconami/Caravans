@@ -1,10 +1,10 @@
 package com.zconami.Caravans.domain;
 
-import static com.zconami.Caravans.util.Utils.broadcastMessage;
-import static com.zconami.Caravans.util.Utils.getCaravansConfig;
-import static com.zconami.Caravans.util.Utils.getCaravansPlugin;
-import static com.zconami.Caravans.util.Utils.getLogger;
-import static com.zconami.Caravans.util.Utils.getOnlinePlayers;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansConfig;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansLogger;
+import static com.zconami.Caravans.CaravansPlugin.getCaravansPlugin;
+import static com.zconami.Core.util.Utils.broadcastMessage;
+import static com.zconami.Core.util.Utils.getOnlinePlayers;
 
 import java.util.Set;
 import java.util.UUID;
@@ -28,11 +28,12 @@ import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
 import com.zconami.Caravans.CaravansPlugin;
-import com.zconami.Caravans.storage.DataKey;
 import com.zconami.Caravans.util.DynmapUtils;
-import com.zconami.Caravans.util.NMSUtils;
 import com.zconami.Caravans.util.ScoreboardUtils;
-import com.zconami.Caravans.util.Utils;
+import com.zconami.Core.domain.LinkedEntity;
+import com.zconami.Core.storage.DataKey;
+import com.zconami.Core.util.NMSUtils;
+import com.zconami.Core.util.Utils;
 
 import net.minecraft.server.v1_8_R3.EntityHorse;
 
@@ -153,7 +154,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
         Preconditions.checkNotNull(origin);
         Preconditions.checkNotNull(inventory);
 
-        getLogger().info("Creating mule caravan");
+        getCaravansLogger().info("Creating mule caravan");
 
         final Block block = origin.getCenter().getBlock();
         Sign sign = (Sign) block.getState().getData();
