@@ -23,6 +23,7 @@ import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.Util;
 import org.gestern.gringotts.accountholder.PlayerAccountHolder;
 
+import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.Caravan;
 import com.zconami.Caravans.domain.Region;
@@ -119,7 +120,7 @@ public class CaravanEventListener implements Listener {
                         final String announcement = String.format(
                                 "A trade caravan with an investment of §a%s§f completed successfully by %s returning §a%s§f!",
                                 Util.format(caravan.getInvestment()), beneficiaryName, Util.format(beneficiaryReturn));
-                        broadcastMessage(announcement);
+                        broadcastMessage(CaravansPlugin.PLUGIN_NAME, announcement);
                     }
 
                     final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(beneficiary.getKey()));
@@ -151,7 +152,7 @@ public class CaravanEventListener implements Listener {
             } else {
                 announcementBuilder.append("!");
             }
-            broadcastMessage(announcementBuilder.toString());
+            broadcastMessage(CaravansPlugin.PLUGIN_NAME, announcementBuilder.toString());
 
             final Region origin = caravan.getOrigin();
             if (origin.isRemoveAfterLastCaravan() && caravanRepository.activeFrom(origin).size() == 1) {

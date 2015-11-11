@@ -243,8 +243,9 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                     public void run() {
                         if (getBukkitEntity().isValid()) {
                             final Location location = getBukkitEntity().getLocation();
-                            broadcastMessage(String.format("The location of %s's caravan is %d,%d", beneficiaryName,
-                                    location.getBlockX(), location.getBlockZ()));
+                            broadcastMessage(CaravansPlugin.PLUGIN_NAME,
+                                    String.format("The location of %s's caravan is %d,%d", beneficiaryName,
+                                            location.getBlockX(), location.getBlockZ()));
                             ScoreboardUtils.setUpScoreboardCaravanTask(Caravan.this);
                             DynmapUtils.setupDynmapCaravanTask(Caravan.this);
                             locationIsPublic();
@@ -252,7 +253,7 @@ public class Caravan extends LinkedEntity<Horse, EntityHorse> {
                     }
                 }, Utils.ticksFromSeconds(announceLocationDelay));
             }
-            broadcastMessage(announcementBuilder.toString());
+            broadcastMessage(CaravansPlugin.PLUGIN_NAME, announcementBuilder.toString());
         }
 
     }

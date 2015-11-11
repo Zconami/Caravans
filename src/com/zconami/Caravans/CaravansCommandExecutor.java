@@ -95,22 +95,25 @@ public class CaravansCommandExecutor implements CommandExecutor {
                 final String playerName = args[1];
                 final Beneficiary targetBeneficiary = beneficiaryRepository.findByName(playerName);
                 if (targetBeneficiary == null) {
-                    sendMessage(sender, "Can't find that player, are you sure you typed it right?");
+                    sendMessage(sender, CaravansPlugin.PLUGIN_NAME,
+                            "Can't find that player, are you sure you typed it right?");
                     return true;
                 }
 
                 final Caravan targetCaravan = caravanRepository.findByBeneficiary(targetBeneficiary);
                 if (targetCaravan.isLocationPublic()) {
                     ScoreboardUtils.showScoreboard((Player) sender, targetCaravan);
-                    sendMessage(sender, "Now tracking " + playerName + "'s caravan");
+                    sendMessage(sender, CaravansPlugin.PLUGIN_NAME, "Now tracking " + playerName + "'s caravan");
                 } else {
-                    sendMessage(sender, "Could not find that caravan, has their location been broadcast yet?");
+                    sendMessage(sender, CaravansPlugin.PLUGIN_NAME,
+                            "Could not find that caravan, has their location been broadcast yet?");
                 }
                 return true;
             } else {
-                sendMessage(sender, "/c help - this help page");
-                sendMessage(sender, "/c list - lists active caravans with public locations");
-                sendMessage(sender, "/c track <playerName> - track player's caravan");
+                sendMessage(sender, CaravansPlugin.PLUGIN_NAME, "/c help - this help page");
+                sendMessage(sender, CaravansPlugin.PLUGIN_NAME,
+                        "/c list - lists active caravans with public locations");
+                sendMessage(sender, CaravansPlugin.PLUGIN_NAME, "/c track <playerName> - track player's caravan");
                 return true;
             }
         }

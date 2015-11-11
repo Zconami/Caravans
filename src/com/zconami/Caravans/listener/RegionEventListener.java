@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.entity.Faction;
 import com.massivecraft.factions.entity.MPlayer;
+import com.zconami.Caravans.CaravansPlugin;
 import com.zconami.Caravans.domain.Beneficiary;
 import com.zconami.Caravans.domain.BeneficiaryCreateParameters;
 import com.zconami.Caravans.domain.Caravan;
@@ -97,7 +98,7 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
         final Region origin = regionRepository.findByName(event.getName());
         final Player player = event.getPlayer();
         if (origin == null) {
-            sendMessage(player, "Region not setup properly");
+            sendMessage(player, CaravansPlugin.PLUGIN_NAME, "Region not setup properly");
             return;
         }
 
@@ -109,7 +110,7 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
 
         final boolean exisitingCaravan = caravanRepository.findByBeneficiary(beneficiary) != null;
         if (exisitingCaravan) {
-            sendMessage(player, "You've already got an active caravan!");
+            sendMessage(player, CaravansPlugin.PLUGIN_NAME, "You've already got an active caravan!");
             return;
         }
 
@@ -117,19 +118,20 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
         final long cooldownFinishedMillis = beneficiary.getLastSuccessfulCaravan() + cooldownSeconds * 1000;
         if (System.currentTimeMillis() < cooldownFinishedMillis) {
             final java.util.Date cooldownFinisihedDate = new java.util.Date(cooldownFinishedMillis);
-            sendMessage(player, "You've had a successful run recently! You can start another at "
-                    + ChatColor.DARK_PURPLE + DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(cooldownFinisihedDate));
+            sendMessage(player, CaravansPlugin.PLUGIN_NAME,
+                    "You've had a successful run recently! You can start another at " + ChatColor.DARK_PURPLE
+                            + DateFormatUtils.ISO_TIME_NO_T_FORMAT.format(cooldownFinisihedDate));
             return;
         }
 
         final boolean onePerFaction = getCaravansConfig().getBoolean("caravans.oneActivePerFaction");
         if (onePerFaction) {
             if (playerFaction.getId().equals(Factions.ID_NONE)) {
-                sendMessage(player, "You must be in a faction to have a caravan!");
+                sendMessage(player, CaravansPlugin.PLUGIN_NAME, "You must be in a faction to have a caravan!");
                 return;
             }
             if (caravanRepository.findByFaction(playerFaction) != null) {
-                sendMessage(player, "Your faction already has an active caravan!");
+                sendMessage(player, CaravansPlugin.PLUGIN_NAME, "Your faction already has an active caravan!");
                 return;
             }
         }
@@ -158,8 +160,8 @@ public class RegionEventListener implements Listener, EntityObserver<Region> {
                     final CaravanPostCreateEvent caravanCreateEvent = new CaravanPostCreateEvent(caravan);
                     Bukkit.getServer().getPluginManager().callEvent(caravanCreateEvent);
                 } else {
-                    sendMessage(player, "You must invest some " + GringottsUtils.getGringottsNamePlural()
-                            + " in cargo before you can create a caravan!");
+                    sendMessage(player, CaravansPlugin.PLUGIN_NAME, "You must invest some "
+                            + GringottsUtils.getGringottsNamePlural() + " in cargo before you can create a caravan!");
                 }
                 inventory.forEach(itemStack -> {
                     if (itemStack != null && GringottsUtils.isNotCurrency(itemStack)) {
